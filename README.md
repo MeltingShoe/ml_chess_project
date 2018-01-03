@@ -21,3 +21,18 @@ env.render()
 env.step("b4")
 env.render()
 ```
+
+## Installation
+
+```
+pip install -e .
+```
+
+## Running chess as a gym environment
+```
+import gym
+import gym_chess
+
+env = gym.make('chess-v0')
+env.render()
+```
