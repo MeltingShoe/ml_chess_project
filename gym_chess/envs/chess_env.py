@@ -20,7 +20,7 @@ class ChessEnv(gym.Env):
             move = board.san(chess.Move(chess.E2, chess.E4))
             self.env.push_san(move)
         """
-        self.env.push_san(action)
+        self.env.push_uci(action)
 
         state = self.env
         reward = 0
