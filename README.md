@@ -9,7 +9,7 @@ For usage and installation instructions, see: https://pypi.python.org/pypi/pytho
 ### OpenAI Gym
 For installation instructions, see: https://www.youtube.com/watch?v=Io1wOuHEyW0&feature=youtu.be
 
-## Running the game:
+## Running the game without installation:
 While in the same directory as chess_env.py, you can try running the script below in Python:
 
 ```
@@ -18,11 +18,11 @@ from chess_env import ChessEnv
 env = ChessEnv()
 env.reset()
 env.render()
-env.step("b4")
+env.step("b2b4")
 env.render()
 ```
 
-## Installation
+## gym_chess Installation
 
 ```
 pip install -e .

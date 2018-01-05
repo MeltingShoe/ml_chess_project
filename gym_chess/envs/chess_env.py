@@ -28,7 +28,7 @@ class ChessEnv(gym.Env):
             is_terminated: boolean
             info: dictionary containing any debugging information
         """
-        self.env.push_san(action)
+        self.env.push_uci(action)
 
         state = self._get_array_state()
         reward = float(0)
