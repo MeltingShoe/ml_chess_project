@@ -7,8 +7,7 @@ from Model import Model
 class Network():
     """
     params:
-        architecture: a string like "Conv", "LSTM" etc
-        activation_function: like F.relu
+        model: Class of the model we want to use
         loss_function: a function like nn.MSELoss
         optimizer: optimizer like optim.SGD
         learning rate: float representing learning rate of the model
