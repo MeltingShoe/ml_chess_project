@@ -1,5 +1,6 @@
 import torch.optim as optim
 import torch
+import torch.nn as nn
 from torch.autograd import Variable
 
 class Network():
@@ -16,6 +17,7 @@ class Network():
         self.model = model
         if use_cuda:
             self.model.cuda()
+        self.initialize_weights()
         self.loss_function = loss_function()
         self.optimizer = optimizer(self.model.parameters(), lr=learning_rate)
 
@@ -62,11 +64,15 @@ class Network():
 
         print('Accuracy on the validation set: {0}'.format(100.0 * correct_count / total_count))
 
-    def initialize_weights(self, mean=0.0, variance=0.02, bias = -1):
+    def initialize_weights(self, mean=0.0, variance=0.1, bias=0):
         """ intialize network weights as Normal Distribution of given mean and variance """
-        self.model.weight.data.normal_(mean, variance)
-        if bias >= 0:
-            self.model.bias.data.fill_(bias)      
+        for module in self.model.modules():
+            if isinstance(module, nn.Conv2d):
+                module.weight.data.normal_(mean, variance)
+                module.bias.data.fill_(bias)
+            elif isinstance(module, nn.Linear):
+                module.weight.data.normal_(mean, variance)
+                module.bias.data.fill_(bias)
 
     def save_params(self, path='auto'):
         """save model to file """
