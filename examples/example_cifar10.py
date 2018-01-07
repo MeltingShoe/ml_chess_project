@@ -6,11 +6,10 @@ import torch.nn.functional as F
 import torchvision
 import torchvision.transforms as transforms
 
-from classes.model import Model
 from classes.network import Network
 
 
-class BasicConvNet(Model):
+class BasicConvNet(nn.Module):
 
     def __init__(self):
         super(BasicConvNet, self).__init__()
