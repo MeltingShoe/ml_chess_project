@@ -47,6 +47,16 @@ class ChessEnv(gym.Env):
     def _render(self, mode='human', close=False):
         print(self.env)
 
+    def _get_legal_move_list(self):
+      a = list(enumerate(self.env.legal_moves))
+      b = [x[1] for x in a]
+      c = []
+      i = 0
+      for item in b:
+        c.append(str(b[i]))
+        i += 1
+      return c
+
     def _get_array_state(self):
         """
         input: String from chess.Board.board_fen().  Ex.: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
@@ -79,4 +89,5 @@ class ChessEnv(gym.Env):
                     state[row][col] = piece_enum
                     col += 1
             row += 1
-        return state
+        legal_moves = self._get_legal_move_list()
+        return [state, legal_moves]
