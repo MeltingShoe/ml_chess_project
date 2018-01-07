@@ -67,11 +67,9 @@ class Network():
     def initialize_weights(self, mean=0.0, variance=0.1, bias=0):
         """ intialize network weights as Normal Distribution of given mean and variance """
         for module in self.model.modules():
-            if isinstance(module, nn.Conv2d):
+            if hasattr(module, "weight"):
                 module.weight.data.normal_(mean, variance)
-                module.bias.data.fill_(bias)
-            elif isinstance(module, nn.Linear):
-                module.weight.data.normal_(mean, variance)
+            if hasattr(module, "bias"):
                 module.bias.data.fill_(bias)
 
     def save_params(self, path='auto'):
