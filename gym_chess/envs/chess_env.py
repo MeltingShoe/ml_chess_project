@@ -18,20 +18,21 @@ class ChessEnv(gym.Env):
 
     def _step(self, action):
         """
-        alternative step?:
-            move = board.san(chess.Move(chess.E2, chess.E4))
-            self.env.push_san(move)
+        input: action in UCI format (i.e. 'a2a4')
 
         :return:
-            state: numpy array
-            reward: Float
-            is_terminated: boolean
+            state: numpy array with all pieces represented as integers
+            reward: Float value
+            is_terminated: if game has ended in checkmate, stalemate, insufficient material, seventyfive-move rule,
+                           fivefold repetition, or a variant end condition.
             info: dictionary containing any debugging information
         """
+        reward = self.generate_reward(action)
+
         self.env.push_uci(action)
 
         state = self._get_array_state()
-        reward = float(0)
+        reward = self.update_reward(reward)
         is_terminated = self.env.is_game_over()
         info = {}
         return state, reward, is_terminated, info
@@ -80,3 +81,50 @@ class ChessEnv(gym.Env):
                     col += 1
             row += 1
         return state
+
+    def update_reward(self, current_reward):
+        reward = current_reward
+
+        if self.env.is_check():
+            reward += REWARD_LOOKUP['check']
+
+        end_game_result = self.env.result()
+        if '1-0' in end_game_result or '0-1' in end_game_result:
+            reward = REWARD_LOOKUP['mate']
+        elif '1/2-1/2' in end_game_result:
+            reward = REWARD_LOOKUP['stalemate']
+
+        return reward
+
+    def generate_reward(self, action):
+        """Assign rewards to moves, captures, queening, checks, and winning"""
+        reward = 0.0
+        piece_map = self.env.piece_map()
+
+        to_square = chess.Move.from_uci(action).to_square
+        if to_square in piece_map.keys():
+            captured_piece = piece_map[to_square].symbol()
+            reward = REWARD_LOOKUP[captured_piece.lower()]
+
+        promotion = chess.Move.from_uci(action).promotion
+        if promotion is not None:
+            reward += REWARD_LOOKUP[str(promotion)]
+
+        return reward
+
+
+REWARD_LOOKUP = {
+    'check': 0.05,
+    'mate': 100.0,
+    'stalemate': 0.0,
+    'p': 0.1,
+    'n': 0.3,
+    'b': 0.3,
+    'r': 0.5,
+    'q': 0.9,
+    '1': 0.1,  # Promotion to pawn
+    '2': 0.1,  # Promotion to knight
+    '3': 0.1,  # Promotion to bishop
+    '4': 0.1,  # Promotion to rook
+    '5': 0.1   # Promotion to queen
+}
