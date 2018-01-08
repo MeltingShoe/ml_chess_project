@@ -15,33 +15,58 @@ class ChessEnv(gym.Env):
 
     def __init__(self):
         self.env = chess.Board()
+        self.alt_moves = 0
 
     def _step(self, action):
         """
         input: action in UCI format (i.e. 'a2a4')
 
         :return:
-            state: numpy array with all pieces represented as integers
+            state: numpy array:  [[board with all pieces represented as integers], [list of legal moves]]
             reward: Float value
             is_terminated: if game has ended in checkmate, stalemate, insufficient material, seventyfive-move rule,
             info: dictionary containing any debugging information
                            fivefold repetition, or a variant end condition.
         """
-        reward = self.generate_reward(action)
+        while self.alt_moves > 0:
+            self.env.pop()
+            self.alt_moves -= 1
+
+        reward = self._generate_reward(action)
 
         self.env.push_uci(action)
 
         state = self._get_array_state()
-        reward = self.update_reward(reward)
+        reward = self._update_reward(reward)
         is_terminated = self.env.is_game_over()
         info = {}
         return state, reward, is_terminated, info
+
+    def alt_step(self, action):
+        """
+        Similar to step().  However, calling step() will remove all moves made by alt_step(), and
+        revert to the last move used in step().
+
+        :param action: action in UCI format (i.e. 'a2a4')
+        :return:
+            state: numpy array:  [[board with all pieces represented as integers], [list of legal moves]]
+            is_terminated: if game has ended in checkmate, stalemate, insufficient material, seventyfive-move rule,
+                           fivefold repetition, or a variant end condition.
+        """
+        self.alt_moves += 1
+        self.env.push_uci(action)
+
+        state = self._get_array_state()
+        is_terminated = self.env.is_game_over()
+        info = {}
+        return state, is_terminated, info
 
     def _reset(self):
         """
         :return: current state as numpy array
         """
         self.env.reset()
+        self.alt_moves = 0
         state = self._get_array_state()
         return state
 
@@ -93,7 +118,7 @@ class ChessEnv(gym.Env):
         legal_moves = self._get_legal_move_list()
         return [state, legal_moves]
 
-    def update_reward(self, current_reward):
+    def _update_reward(self, current_reward):
         reward = current_reward
 
         if self.env.is_check():
@@ -107,7 +132,7 @@ class ChessEnv(gym.Env):
 
         return reward
 
-    def generate_reward(self, action):
+    def _generate_reward(self, action):
         """Assign rewards to moves, captures, queening, checks, and winning"""
         reward = 0.0
         piece_map = self.env.piece_map()
@@ -120,7 +145,6 @@ class ChessEnv(gym.Env):
         promotion = chess.Move.from_uci(action).promotion
         if promotion is not None:
             reward += REWARD_LOOKUP[str(promotion)]
-
         return reward
 
 
