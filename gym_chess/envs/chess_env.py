@@ -28,9 +28,7 @@ class ChessEnv(gym.Env):
             info: dictionary containing any debugging information
                            fivefold repetition, or a variant end condition.
         """
-        while self.alt_moves > 0:
-            self.env.pop()
-            self.alt_moves -= 1
+        self.alt_reset()
 
         reward = self._generate_reward(action)
 
@@ -60,6 +58,20 @@ class ChessEnv(gym.Env):
         is_terminated = self.env.is_game_over()
         info = {}
         return state, is_terminated, info
+
+    def alt_pop(self):
+        """Pops a single move performed by alt_step()"""
+        if self.alt_moves > 0:
+            self.env.pop()
+            self.alt_moves -= 1
+        return self._get_array_state()
+
+    def alt_reset(self):
+        """Pops all moves performed by alt_step()"""
+        while self.alt_moves > 0:
+            self.env.pop()
+            self.alt_moves -= 1
+        return self._get_array_state()
 
     def _reset(self):
         """
