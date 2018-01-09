@@ -44,8 +44,9 @@ Values are always positive **for the side who's turn it is.**
 
 ### reward
 Float value defined in the REWARD_LOOKUP dict.
-Reward values are currently set as such:
 
+Reward values are currently set as such:
+```
 Check: 0.05
 Checkmate: 100
 Stalemate: 0
@@ -56,6 +57,7 @@ Knight: 0.3
 Bishop: 0.3
 Rook: 0.5
 Queen: 0.9
+```
 
 ### is_terminated
 Boolean value representing if the game has ended in checkmate, stalemate, insufficient material, seventyfive-move rule, fivefold repetition, or a variant end condition.
@@ -67,16 +69,19 @@ Dictionary containing any debugging information
 
 ### action
 The move to be played
+
 Must be represented in UCI format (i.e. 'a2a4' or 'b7b8q')
 
 ## Methods
 
 ### step(action)
 Plays a move
+
 Returns state, reward, is_terminated, info
 
 ### reset()
 Resets the board to the starting position
+
 Returns state
 
 ### render()
@@ -84,14 +89,19 @@ Prints the board to the console with pieces represented as letters
 
 ### alt_step(action)
 Similar to step(). However, calling step() will remove all moves made by alt_step(), and revert to the last move used in step().
+
 This can be used to allow the agent to look ahead several moves.
+
 Returns state, is_terminated, info
 
 ### alt_pop()
 Pops a single move performed by alt_step()
+
 This can be used to build trees of possible future board positions.
+
 Returns state
 
 ### alt_reset()
 Pops all moves performed by alt_step() 
+
 Returns state
