@@ -54,8 +54,8 @@ class MyTestCase(unittest.TestCase):
 
         actual = self.env.reset()
 
-        self.assertTrue(np.array_equal(e_map, actual[0]))
-        self.assertTrue(np.array_equal(e_legal_moves, actual[1]))
+        self.assertTrue(np.array_equal(e_map, actual))
+        self.assertTrue(np.array_equal(e_legal_moves, self.env.action_space.n))
 
     def test_single_step_happy_path(self):
         e_map, e_legal_moves = get_single_step_state()
@@ -64,8 +64,8 @@ class MyTestCase(unittest.TestCase):
         self.env.reset()
         a_state, a_reward, a_terminated, _ = self.env.step("a2a4")
 
-        self.assertTrue(np.array_equal(e_map, a_state[0]))
-        self.assertTrue(np.array_equal(e_legal_moves, a_state[1]))
+        self.assertTrue(np.array_equal(e_map, a_state))
+        self.assertTrue(np.array_equal(e_legal_moves, self.env.action_space.n))
         self.assertEqual(e_reward, a_reward)
         self.assertFalse(a_terminated)
 
@@ -77,8 +77,8 @@ class MyTestCase(unittest.TestCase):
         self.env.step("a2a4")
         a_state, a_reward, a_terminated, _ = self.env.step("b7b5")
 
-        self.assertTrue(np.array_equal(e_map, a_state[0]))
-        self.assertTrue(np.array_equal(e_legal_moves, a_state[1]))
+        self.assertTrue(np.array_equal(e_map, a_state))
+        self.assertTrue(np.array_equal(e_legal_moves, self.env.action_space.n))
         self.assertEqual(e_reward, a_reward)
         self.assertFalse(a_terminated)
 
@@ -88,8 +88,8 @@ class MyTestCase(unittest.TestCase):
         self.env.reset()
         a_state, a_terminated, _ = self.env.alt_step("a2a4")
 
-        self.assertTrue(np.array_equal(e_map, a_state[0]))
-        self.assertTrue(np.array_equal(e_legal_moves, a_state[1]))
+        self.assertTrue(np.array_equal(e_map, a_state))
+        self.assertTrue(np.array_equal(e_legal_moves, self.env.action_space.n))
         self.assertFalse(a_terminated)
 
     def test_alt_step_step(self):
@@ -99,8 +99,8 @@ class MyTestCase(unittest.TestCase):
         self.env.alt_step("d2d4")
         a_state, a_reward, a_terminated, _ = self.env.step("a2a4")
 
-        self.assertTrue(np.array_equal(e_map, a_state[0]))
-        self.assertTrue(np.array_equal(e_legal_moves, a_state[1]))
+        self.assertTrue(np.array_equal(e_map, a_state))
+        self.assertTrue(np.array_equal(e_legal_moves, self.env.action_space.n))
         self.assertFalse(a_terminated)
 
     def test_alt_step_reset(self):
@@ -110,8 +110,8 @@ class MyTestCase(unittest.TestCase):
         self.env.alt_step("d2d4")
         a_state = self.env.reset()
 
-        self.assertTrue(np.array_equal(e_map, a_state[0]))
-        self.assertTrue(np.array_equal(e_legal_moves, a_state[1]))
+        self.assertTrue(np.array_equal(e_map, a_state))
+        self.assertTrue(np.array_equal(e_legal_moves, self.env.action_space.n))
 
     def test_alt_step_reset_step(self):
         e_map, e_legal_moves = get_single_step_state()
@@ -121,8 +121,8 @@ class MyTestCase(unittest.TestCase):
         self.env.reset()
         a_state, a_reward, a_terminated, _ = self.env.step("a2a4")
 
-        self.assertTrue(np.array_equal(e_map, a_state[0]))
-        self.assertTrue(np.array_equal(e_legal_moves, a_state[1]))
+        self.assertTrue(np.array_equal(e_map, a_state))
+        self.assertTrue(np.array_equal(e_legal_moves, self.env.action_space.n))
         self.assertFalse(a_terminated)
 
     def test_alt_step_alt_reset(self):
@@ -134,8 +134,8 @@ class MyTestCase(unittest.TestCase):
         self.env.alt_step("a4a5")
         a_state = self.env.alt_reset()
 
-        self.assertTrue(np.array_equal(e_map, a_state[0]))
-        self.assertTrue(np.array_equal(e_legal_moves, a_state[1]))
+        self.assertTrue(np.array_equal(e_map, a_state))
+        self.assertTrue(np.array_equal(e_legal_moves, self.env.action_space.n))
 
     def test_alt_step_alt_pop(self):
         e_map, e_legal_moves = get_two_step_state()
@@ -146,8 +146,8 @@ class MyTestCase(unittest.TestCase):
         self.env.alt_step("a4a5")
         a_state = self.env.alt_pop()
 
-        self.assertTrue(np.array_equal(e_map, a_state[0]))
-        self.assertTrue(np.array_equal(e_legal_moves, a_state[1]))
+        self.assertTrue(np.array_equal(e_map, a_state))
+        self.assertTrue(np.array_equal(e_legal_moves, self.env.action_space.n))
 
 
 if __name__ == '__main__':
