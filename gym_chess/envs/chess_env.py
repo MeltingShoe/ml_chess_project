@@ -182,7 +182,7 @@ class ChessEnv(gym.Env):
     def set_reward(self, index, value):
         '''sets value of reward given it's index'''
         if index in self.reward_lookup:
-            self.reward_lookup['index'] = value
+            self.reward_lookup[index] = value
         else:
             return 'index not found'
         return self.reward_lookup
