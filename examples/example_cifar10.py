@@ -34,11 +34,10 @@ if __name__ == "__main__":  # Required to allow multiprocessing on windows
     # Please do not add the "data" folder to git.
 
     restore_model = True
-    save_model = True
     save_root_path = os.path.join("saves", "cifar10")
     save_model_path = os.path.join(save_root_path, "model")
 
-    if restore_model or save_model:
+    if restore_model:
         if not os.path.exists(save_root_path):
             os.makedirs(save_root_path)
 
@@ -62,17 +61,8 @@ if __name__ == "__main__":  # Required to allow multiprocessing on windows
     loss_function = nn.CrossEntropyLoss
     optimizer = optim.Adam
 
-    network = Network(model, loss_function, optimizer, 0.001, use_cuda=True)
-
-    if restore_model:
-        if os.path.isfile(save_model_path):
-            network.load_params(save_model_path)
+    network = Network(model, loss_function, optimizer, 0.001, use_cuda=True, resume=True, filepath=save_model_path)
 
     # Train the model
-    num_epochs = 5
-    for i in range(num_epochs):
-        network.training(trainloader, 1)
-        network.validate(testloader)
-
-    if save_model:
-        network.save_params(save_model_path)
+    num_epochs = 10
+    network.training_session(trainloader, testloader, num_epochs)
