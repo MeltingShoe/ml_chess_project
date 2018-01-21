@@ -36,6 +36,8 @@ class Network():
         for epoch in range(self.start_epoch, n_epochs, 1):
             self.train(train_data, epoch)
             self.validate(test_data)
+
+        self.save_params()
         
     
     def train(self, dataloader, epoch, starting_index=0, print_batch=False):
