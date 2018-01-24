@@ -1,14 +1,19 @@
-import torch
+import classes.utils as utils
+
 from torch.autograd import Variable
 
 
 class default_train():
 
-    def __init__(self, loss_function, optimizer, use_cuda=True):
-        self.loss_function = loss_function
-        self.optimizer = optimizer
+    def __init__(self, loss_function, optimizer, trainable_params, learning_rate):
+        self.loss_function = loss_function()
+        self.optimizer = optimizer(trainable_params, lr=learning_rate)
+        self.use_cuda = False
 
-    def train(self, dataloader, epoch, starting_index=0, print_batch=False):
+    def cuda(self):
+        self.use_cuda = True
+
+    def train(self, feed_forward, dataloader, epoch, starting_index=0, print_batch=False):
         """function to train the network """
         epoch_loss = 0.0
         for i, data in enumerate(dataloader, starting_index):
@@ -21,7 +26,7 @@ class default_train():
 
             self.optimizer.zero_grad()  # zero parameters gradient
 
-            outputs = self.model(inputs)  # forward
+            outputs = feed_forward(inputs)  # forward
             loss = self.loss_function(outputs, labels)  # compute loss
             loss.backward()  # backpropagation
             self.optimizer.step()  # optimization
@@ -36,7 +41,7 @@ class default_train():
         # we can save how many information as we want
         checkpoint = {
             'epoch': epoch + 1,
-            'state_dict': self.model.state_dict(),
+            'state_dict': feed_forward.state_dict(),
             'optimizer': self.optimizer.state_dict(),
         }
-        self.save_checkpoint(checkpoint)
+        utils.save_checkpoint(checkpoint)

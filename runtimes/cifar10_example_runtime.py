@@ -1,6 +1,5 @@
-
-from classes import utils
 from classes.base_model import base_model
+from models.evaluate.default_evaluate import default_evaluate
 from models.feed_forward.example_cifar10_ff import BasicConvNet
 from models.train.default_train import default_train
 
@@ -8,10 +7,8 @@ import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torch.nn.functional as F
 import torchvision
 import torchvision.transforms as transforms
-from torch.autograd import Variable
 
 
 class runtime():
@@ -20,32 +17,7 @@ class runtime():
         self.model = model
 
     def training_session(self, train_data, test_data, n_epochs):
-        """function to manage the train session"""
-        for epoch in range(self.start_epoch, n_epochs, 1):
-            self.model.train(train_data, epoch)
-            self.model.validate(test_data)
-
-        self.save_params()
-
-    def validate(self, dataloader):
-        correct_count = 0
-        total_count = 0
-        for i, data in enumerate(dataloader):
-            inputs, labels = data
-            if self.use_cuda:
-                inputs, labels = inputs.cuda(), labels.cuda()
-
-            inputs = Variable(inputs)
-
-            outputs = self.model(inputs)
-            max, argmax = torch.max(outputs.data, 1)
-            predicted = argmax
-
-            correct_count += (predicted == labels).sum()
-            total_count += dataloader.batch_size
-
-        print('Accuracy on the validation set: {0}'.format(
-            100.0 * correct_count / total_count))
+        self.model.training_session(train_data, test_data, n_epochs)
 
 
 if __name__ == "__main__":  # Required to allow multiprocessing on windows
@@ -77,14 +49,14 @@ if __name__ == "__main__":  # Required to allow multiprocessing on windows
                                              shuffle=False, num_workers=4)
 
     feed_forward = BasicConvNet()
-    training_method = default_train()
-    evaluate = 0
-    # loss_function = nn.CrossEntropyLoss
-    # optimizer = optim.Adam
+    training_method = default_train(loss_function=nn.CrossEntropyLoss, optimizer=optim.Adam,
+                                    trainable_params=feed_forward.parameters(), learning_rate=0.001)
+    evaluate = default_evaluate()
 
     network = base_model(feed_forward, training_method, evaluate,
                          use_cuda=True, resume=True, filepath=save_model_path)
 
     # Train the model
     num_epochs = 10
-    network.training_session(trainloader, testloader, num_epochs)
+    runtime_obj = runtime(network)
+    runtime_obj.training_session(trainloader, testloader, num_epochs)

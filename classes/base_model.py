@@ -1,11 +1,8 @@
-import os
-import torch.optim as optim
 import torch
-import torch.nn as nn
-from torch.autograd import Variable
+import classes.utils as utils
 
 
-class base_model():
+class base_model():  # TODO class names should use CamelCase convention
     """
     params:
         feed_forward: The feed forward method of a model
@@ -22,20 +19,22 @@ class base_model():
         self.feed_forward = feed_forward
         self.training_method = training_method
         self.evaluate = evaluate
-        if use_cuda:
-            self.model.cuda()
+        if self.use_cuda:
+            self.feed_forward.cuda()
+            self.training_method.cuda()
+            self.evaluate.cuda()
         if resume:
-            if not self.load_checkpoint():  # TODO decide a pattern for filenames
+            if not utils.load_checkpoint(self):  # TODO decide a pattern for filenames
                 self.start_epoch = 0
-                self.initialize_weights()
+                utils.initialize_weights(self.feed_forward.modules())
         else:
             self.start_epoch = 0
-            self.initialize_weights()
+            utils.initialize_weights(self.feed_forward.modules())
 
     def training_session(self, train_data, test_data, n_epochs):
         """function to manage the train session"""
         for epoch in range(self.start_epoch, n_epochs, 1):
-            self.train(train_data, epoch)
-            self.validate(test_data)
+            self.training_method.train(self.feed_forward, train_data, epoch)
+            self.evaluate(self.feed_forward, test_data)
 
-        self.save_params()
+        utils.save_params(self.feed_forward.state_dict(), self.filepath)
