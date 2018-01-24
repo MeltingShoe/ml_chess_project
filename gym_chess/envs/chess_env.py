@@ -1,6 +1,7 @@
 import gym
 from gym import error, spaces, utils
 from gym.utils import seeding
+from gym.spaces import prng
 
 import numpy as np
 
@@ -16,6 +17,7 @@ class ChessEnv(gym.Env):
 
     def __init__(self):
         self.env = chess.Board()
+        self.action_space = self.ChessActionSpace(self.env.legal_moves)
         self.alt_moves = 0
         self.reward_lookup = {
             'check': 0.05,
@@ -48,7 +50,7 @@ class ChessEnv(gym.Env):
 
         reward = self._generate_reward(action)
 
-        self.env.push_uci(action)
+        self._act(action)
 
         state = self._get_array_state()
         reward = self._update_reward(reward)
@@ -68,7 +70,7 @@ class ChessEnv(gym.Env):
                            fivefold repetition, or a variant end condition.
         """
         self.alt_moves += 1
-        self.env.push_uci(action)
+        self._act(action)
 
         state = self._get_array_state()
         is_terminated = self.env.is_game_over()
@@ -79,6 +81,7 @@ class ChessEnv(gym.Env):
         """Pops a single move performed by alt_step()"""
         if self.alt_moves > 0:
             self.env.pop()
+            self.action_space.set_legal_moves(self.env.legal_moves)
             self.alt_moves -= 1
         return self._get_array_state()
 
@@ -86,30 +89,26 @@ class ChessEnv(gym.Env):
         """Pops all moves performed by alt_step()"""
         while self.alt_moves > 0:
             self.env.pop()
+            self.action_space.set_legal_moves(self.env.legal_moves)
             self.alt_moves -= 1
         return self._get_array_state()
+
+    def _act(self, action):
+        self.env.push_uci(action)
+        self.action_space.set_legal_moves(self.env.legal_moves)
 
     def _reset(self):
         """
         :return: current state as numpy array
         """
         self.env.reset()
+        self.action_space.set_legal_moves(self.env.legal_moves)
         self.alt_moves = 0
         state = self._get_array_state()
         return state
 
     def _render(self, mode='human', close=False):
         print(self.env)
-
-    def _get_legal_move_list(self):
-        a = list(enumerate(self.env.legal_moves))
-        b = [x[1] for x in a]
-        c = []
-        i = 0
-        for item in b:
-            c.append(str(b[i]))
-            i += 1
-        return c
 
     def _get_array_state(self):
         """
@@ -143,8 +142,7 @@ class ChessEnv(gym.Env):
                     state[row][col] = piece_enum
                     col += 1
             row += 1
-        legal_moves = self._get_legal_move_list()
-        return [state, legal_moves]
+        return state
 
     def _update_reward(self, current_reward):
         reward = current_reward
@@ -176,13 +174,39 @@ class ChessEnv(gym.Env):
         return reward
 
     def get_rewards_dict(self):
-        '''returns dict of rewards'''
+        """Returns dict of rewards"""
         return self.reward_lookup
 
     def set_reward(self, index, value):
-        '''sets value of reward given it's index'''
+        """Sets value of reward given it's index"""
         if index in self.reward_lookup:
             self.reward_lookup[index] = value
         else:
             return 'index not found'
         return self.reward_lookup
+
+    class ChessActionSpace(gym.Space):
+
+        def __init__(self, legal_moves):
+            self.n = list(str(legal_move) for legal_move in legal_moves)
+
+        def sample(self):
+            return prng.np_random.choice(self.n)
+
+        def contains(self, x):
+            if not isinstance(x, str):
+                return False
+            return x in self.n
+
+        def set_legal_moves(self, legal_moves):
+            self.n = list(str(legal_move) for legal_move in legal_moves)
+
+        @property
+        def shape(self):
+            return (len(self.n),)
+
+        def __repr__(self):
+            return "ChessActionSpace({})".format(self.n)
+
+        def __eq__(self, other):
+            return set(self.n) == set(other)
