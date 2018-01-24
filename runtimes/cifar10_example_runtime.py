@@ -1,5 +1,5 @@
 from classes.base_model import base_model
-from models.evaluate.default_evaluate import default_evaluate
+from models.evaluate.supervised_evaluate import supervised_evaluate
 from models.feed_forward.example_cifar10_ff import BasicConvNet
 from models.train.default_train import default_train
 
@@ -51,7 +51,7 @@ if __name__ == "__main__":  # Required to allow multiprocessing on windows
     feed_forward = BasicConvNet()
     training_method = default_train(loss_function=nn.CrossEntropyLoss, optimizer=optim.Adam,
                                     trainable_params=feed_forward.parameters(), learning_rate=0.001)
-    evaluate = default_evaluate()
+    evaluate = supervised_evaluate()
 
     network = base_model(feed_forward, training_method, evaluate,
                          use_cuda=True, resume=True, filepath=save_model_path)

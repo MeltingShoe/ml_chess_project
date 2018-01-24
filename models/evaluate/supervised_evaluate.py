@@ -2,7 +2,7 @@ import torch
 from torch.autograd import Variable
 
 
-class default_evaluate():
+class supervised_evaluate():
 
     def __init__(self):
         self.use_cuda = False
