@@ -29,3 +29,16 @@ Same thing, just requires that train() is overridden
 As I understand it this shouldn't enforce that method having those specific params
 I think the params for LR, optimizer, etc should be initialized in the BaseModel class
 '''
+
+
+class BasePerformAction(ABC):
+
+    @abstractmethod
+    def perform_action(self, data):
+        pass
+
+
+'''
+I'm getting a feeling I'm completely missing something here, this seems too easy
+I don't think there's anything special we need to do here though
+'''
