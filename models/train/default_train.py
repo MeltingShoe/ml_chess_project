@@ -1,9 +1,9 @@
 import classes.utils as utils
-
+from classes.interfaces import BaseTrain
 from torch.autograd import Variable
 
 
-class default_train():
+class default_train(BaseTrain):
 
     def __init__(self, loss_function, optimizer, trainable_params, learning_rate):
         self.loss_function = loss_function()

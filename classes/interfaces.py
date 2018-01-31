@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 class BaseFeedForward(ABC):
 
     @abstractmethod
-    def feed_forward(self, data):
+    def forward(self, data):
         pass
 
 

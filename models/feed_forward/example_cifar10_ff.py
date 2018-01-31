@@ -1,8 +1,8 @@
 import torch.nn as nn
 import torch.nn.functional as F
+from classes.interfaces import BaseFeedForward
 
-
-class BasicConvNet(nn.Module):
+class BasicConvNet(BaseFeedForward, nn.Module):
 
     def __init__(self):
         super(BasicConvNet, self).__init__()
