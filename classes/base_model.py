@@ -36,7 +36,7 @@ def generate_class(ff, tr, pa):
             self.evaluate(self.feed_forward.forward, test_data)
 
         utils.save_params(
-            self.feed_forward.forward.state_dict(), self.filepath)
+            self.feed_forward.state_dict(), self.filepath)
     def cuda(self):
         self.use_cuda = True
         """
