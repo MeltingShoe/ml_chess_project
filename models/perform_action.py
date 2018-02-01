@@ -2,7 +2,6 @@ import torch
 from torch.autograd import Variable
 
 
-
 def supervised_evaluate(self, feed_forward, dataloader):
     correct_count = 0
     total_count = 0
@@ -21,4 +20,4 @@ def supervised_evaluate(self, feed_forward, dataloader):
         total_count += dataloader.batch_size
 
     print('Accuracy on the validation set: {0}'.format(
-       100.0 * correct_count / total_count))
+        100.0 * correct_count / total_count))

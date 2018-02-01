@@ -1,14 +1,10 @@
-from classes.base_model import generate_class
-from models.evaluate.supervised_evaluate import supervised_evaluate
-from models.feed_forward.example_cifar10_ff import BasicConvNet
-from models.train.default_train import default_train
-
 import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
+import models.model_defs as model
 
 
 class runtime():
@@ -48,11 +44,7 @@ if __name__ == "__main__":  # Required to allow multiprocessing on windows
     testloader = torch.utils.data.DataLoader(testset, batch_size=96,
                                              shuffle=False, num_workers=4)
 
-    feed_forward = BasicConvNet()
-    training_method = default_train
-    evaluate = supervised_evaluate
-    base_model = generate_class(feed_forward, training_method, supervised_evaluate)
-    network = base_model(feed_forward)
+    network = model.cifar10_model()
 
     # Train the model
     num_epochs = 10

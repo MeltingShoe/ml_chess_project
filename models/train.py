@@ -1,11 +1,9 @@
 import classes.utils as utils
-from classes.interfaces import BaseTrain
 from torch.autograd import Variable
 
 
-
-
-def default_train(self, feed_forward, dataloader, epoch, starting_index=0, print_batch=False):
+def default_train(self, feed_forward, dataloader,
+                  epoch, starting_index=0, print_batch=False):
     """function to train the network """
     epoch_loss = 0.0
     for i, data in enumerate(dataloader, starting_index):
