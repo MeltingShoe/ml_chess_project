@@ -1,4 +1,4 @@
-from classes.base_model import base_model
+from classes.base_model import generate_class
 from models.evaluate.supervised_evaluate import supervised_evaluate
 from models.feed_forward.example_cifar10_ff import BasicConvNet
 from models.train.default_train import default_train
@@ -49,12 +49,10 @@ if __name__ == "__main__":  # Required to allow multiprocessing on windows
                                              shuffle=False, num_workers=4)
 
     feed_forward = BasicConvNet()
-    training_method = default_train(loss_function=nn.CrossEntropyLoss, optimizer=optim.Adam,
-                                    trainable_params=feed_forward.parameters(), learning_rate=0.001)
-    evaluate = supervised_evaluate()
-
-    network = base_model(feed_forward, training_method, evaluate,
-                         use_cuda=True, resume=True, filepath=save_model_path)
+    training_method = default_train
+    evaluate = supervised_evaluate
+    base_model = generate_class(feed_forward, training_method, supervised_evaluate)
+    network = base_model(feed_forward)
 
     # Train the model
     num_epochs = 10
