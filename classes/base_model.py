@@ -40,13 +40,14 @@ def generate_class(ff, tr, pa):
              use_cuda=True,
              resume=False,
              filepath='auto'):
-
+        ''''
+        Most of these attributes should be moved to the attrs dict
+        It would help readability and avoid some inheritence
+        collisions if that ever comes up
+        '''
         self.use_cuda = use_cuda and torch.cuda.is_available()
         # We might have to add logic in here to set the filepath, not sure
         self.filepath = filepath
-        self.trainable_params = ff.parameters()
-        # pytorch gets really mad if you don't make the ff it's own class
-        self.feed_forward = ff
         self.loss_function = loss_function()
         self.optimizer = optimizer(self.trainable_params, lr=learning_rate)
         if self.use_cuda:
@@ -82,7 +83,9 @@ def generate_class(ff, tr, pa):
              'training_session': training_session,
              'cuda': cuda,
              'train': tr,
-             'evaluate': pa
+             'evaluate': pa,
+             'feed_forward': ff,
+             'trainable_params': ff.parameters()
              }
     base_model = type('base_model', superclasses, attrs)
     return base_model
