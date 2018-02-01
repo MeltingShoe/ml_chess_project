@@ -19,6 +19,7 @@ def generate_class(ff, tr, pa):
         # from what I've seen this just sets self.use_cuda to true so I'm not sure if this does anything
         if self.use_cuda:
             self.cuda()
+            self.feed_forward.cuda()
         if resume:
             # TODO decide a pattern for filenames
             if not utils.load_checkpoint(self):
