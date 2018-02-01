@@ -34,7 +34,7 @@ def load_checkpoint(model, filename='checkpoint.pth.tar'):
         checkpoint = torch.load(filename)
         model.start_epoch = checkpoint['epoch']
         model.feed_forward.load_state_dict(checkpoint['state_dict'])
-        model.training_method.optimizer.load_state_dict(checkpoint['optimizer'])
+        model.optimizer.load_state_dict(checkpoint['optimizer'])
         print("=> loaded checkpoint '{}' (epoch {})"
               .format(filename, checkpoint['epoch']))
         return True
