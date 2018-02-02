@@ -47,12 +47,11 @@ def initialize_weights(modules, mean=0.0, variance=0.1, bias=0):
             module.bias.data.fill_(bias)
 
 def get_filepath(model_name, checkpoint=False):
-    now = datetime.datetime.now
-    time_str = now.strftime("%Y_%m_%d_%H_%M") 
     if checkpoint:
-        filename = '{}_{}_checkpoint.pth.tar'.format(model_name, time_str)
+        filename = '{}_checkpoint.pth.tar'.format(model_name)
     else:
-        filename = '{}_{}.pth.tar'.format(model_name, time_str)
+        filename = '{}.pth.tar'.format(model_name)
 
     filepath = os.path.join('Saves', filename)
     return filepath
+
