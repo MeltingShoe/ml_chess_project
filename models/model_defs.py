@@ -15,9 +15,11 @@ to simplify imports
 # feed_forward must be passed as an instance
 cifar_10_params = {
     'name': 'cifar_10_model',
+    'ff': ff.BasicConvNet(),   
+    'tr': tr.default_train,
+    'pa': pa.supervised_evaluate,
     'learning_rate': 0.001,
     'optimizer': optim.Adam,
     'loss_function': nn.CrossEntropyLoss
 }
-cifar10_model = generate_class(
-    ff.BasicConvNet(), tr.default_train, pa.supervised_evaluate, cifar_10_params)
+cifar10_model = generate_class(cifar_10_params)

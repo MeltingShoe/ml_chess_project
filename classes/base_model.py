@@ -19,7 +19,7 @@ pa: Currently the supervised evaluate function, we'll need
 '''
 
 
-def generate_class(ff, tr, pa, params):
+def generate_class(params):
     '''
     Setting BaseModel doesn't actually do anything atm because we
     explicitely define the abstract methods in here
@@ -34,7 +34,7 @@ def generate_class(ff, tr, pa, params):
     we can change these if we want
     '''
     #check if all the params are correct
-    if not check_params(ff, tr, pa, params):
+    if not check_params(params):
         return None
 
     def init(self,
@@ -81,32 +81,35 @@ def generate_class(ff, tr, pa, params):
     attrs = {'__init__': init,
              'training_session': training_session,
              'cuda': cuda,
-             'train': tr,
-             'evaluate': pa,
-             'feed_forward': ff,
-             'trainable_params': ff.parameters(),
+             'train': params['tr'],
+             'evaluate': params['pa'],
+             'feed_forward': params['ff'],
+             'trainable_params': params['ff'].parameters(),
              'name': params['name'],
              'learning_rate': params['learning_rate'],
-             'optimizer': params['optimizer'](ff.parameters(), lr=params['learning_rate']),
+             'optimizer': params['optimizer'](params['ff'].parameters(), lr=params['learning_rate']),
              'loss_function': params['loss_function']()
              }
     base_model = type('base_model', superclasses, attrs)
     return base_model
 
-def check_params(ff, tr, pa, params):
-    #check on ff, tr, pa
-    first_check = issubclass(ff, nn.Module) and inspect.isfunction(tr) and inspect.isfunction(pa)
-
-    #check on params
+def check_params(params):
     #check if keys exists in the dictionary
-    keys_check = set('learning_rate', 'loss_function', 'name', 'optimizer').issubset(params)
+    first_check = False
+    type_check = False
+    keys_check = set('learning_rate', 'loss_function', 'name', 'optimizer', 'ff', 'tr', 'pa').issubset(params)
     if keys_check:
         lr = params['learning_rate']
         lf = params['loss_function']
         name = params['name']
         opt = params['optimizer']
+        ff = params['ff']
+        tr = params['tr']
+        pa = params['pa']
 
+        #check on ff, tr, pa
+        first_check = issubclass(ff, nn.Module) and inspect.isfunction(tr) and inspect.isfunction(pa)
         #not completely sure if the last two 'has_attr' work as i think
         type_check = isinstance(lr, float) and lr < 1 and isinstance(name, str) and hasattr(nn, lf) and hasattr(optim, opt)
 
-    return first_check and keys_check and type_check
+    return first_check and type_check
