@@ -1,8 +1,9 @@
+import inspect
 import torch
-import classes.utils as utils
 import torch.nn as nn
 import torch.optim as optim
 from classes.interfaces import BaseModel
+import classes.utils as utils
 
 '''
 This is "class factory" function that generates a new class for each model
@@ -18,7 +19,7 @@ pa: Currently the supervised evaluate function, we'll need
 '''
 
 
-def generate_class(ff, tr, pa):
+def generate_class(ff, tr, pa, params):
     '''
     Setting BaseModel doesn't actually do anything atm because we
     explicitely define the abstract methods in here
@@ -32,14 +33,13 @@ def generate_class(ff, tr, pa):
     made usage easier. I also set defaults for everything,
     we can change these if we want
     '''
+    #check if all the params are correct
+    if not check_params(ff, tr, pa, params):
+        return None
 
     def init(self,
-             loss_function=nn.CrossEntropyLoss,
-             optimizer=optim.Adam,
-             learning_rate=0.001,
              use_cuda=True,
-             resume=False,
-             filepath='auto'):
+             resume=False):
         ''''
         Most of these attributes should be moved to the attrs dict
         It would help readability and avoid some inheritence
@@ -47,9 +47,7 @@ def generate_class(ff, tr, pa):
         '''
         self.use_cuda = use_cuda and torch.cuda.is_available()
         # We might have to add logic in here to set the filepath, not sure
-        self.filepath = filepath
-        self.loss_function = loss_function()
-        self.optimizer = optimizer(self.trainable_params, lr=learning_rate)
+        self.
         if self.use_cuda:
             self.cuda()
             # From what I can tell this is what actually enables cuda
@@ -79,13 +77,36 @@ def generate_class(ff, tr, pa):
     def cuda(self):
         self.use_cuda = True
 
+    #we should check if params are rendundant (e.g. optimizer and learning rate) or if we need other params
     attrs = {'__init__': init,
              'training_session': training_session,
              'cuda': cuda,
              'train': tr,
              'evaluate': pa,
              'feed_forward': ff,
-             'trainable_params': ff.parameters()
+             'trainable_params': ff.parameters(),
+             'name': params['name'],
+             'learning_rate': params['learning_rate'],
+             'optimizer': params['optimizer'](ff.parameters(), lr=params['learning_rate']),
+             'loss_function': params['loss_function']()
              }
     base_model = type('base_model', superclasses, attrs)
     return base_model
+
+def check_params(ff, tr, pa, params):
+    #check on ff, tr, pa
+    first_check = issubclass(ff, nn.Module) and inspect.isfunction(tr) and inspect.isfunction(pa)
+
+    #check on params
+    #check if keys exists in the dictionary
+    keys_check = set('learning_rate', 'loss_function', 'name', 'optimizer').issubset(params)
+    if keys_check:
+        lr = params['learning_rate']
+        lf = params['loss_function']
+        name = params['name']
+        opt = params['optimizer']
+
+        #not completely sure if the last two 'has_attr' work as i think
+        type_check = isinstance(lr, float) and lr < 1 and isinstance(name, str) and hasattr(nn, lf) and hasattr(optim, opt)
+
+    return first_check and keys_check and type_check
