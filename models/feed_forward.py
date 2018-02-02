@@ -7,9 +7,9 @@ class BasicConvNet(nn.Module):
     def __init__(self):
         super(BasicConvNet, self).__init__()
         self.conv1 = nn.Conv2d(3, 32, 3)
-        self.pool1 = nn.MaxPool2d(2,2)
+        self.pool1 = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(32, 64, 3)
-        self.pool2 = nn.MaxPool2d(2,2)
+        self.pool2 = nn.MaxPool2d(2, 2)
         self.fc1 = nn.Linear(64 * 6 * 6, 256)
         self.fc2 = nn.Linear(256, 10)
 
