@@ -34,4 +34,4 @@ def default_train(self, feed_forward, dataloader,
         'state_dict': feed_forward.state_dict(),
         'optimizer': self.optimizer.state_dict(),
     }
-    utils.save_checkpoint(checkpoint)
+    utils.save_checkpoint(checkpoint, self.name)
