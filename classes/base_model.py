@@ -70,7 +70,7 @@ def generate_class(params):
             self.evaluate(self.feed_forward, test_data)
 
         utils.save_params(
-            self.feed_forward.state_dict())
+            self.feed_forward.state_dict(), self.name)
     # not sure if this actually does anything
 
     def cuda(self):

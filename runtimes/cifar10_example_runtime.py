@@ -48,6 +48,6 @@ if __name__ == "__main__":  # Required to allow multiprocessing on windows
     network = model.cifar10_model(resume=True)
 
     # Train the model
-    num_epochs = 10
+    num_epochs = 20
     runtime_obj = runtime(network)
     runtime_obj.training_session(trainloader, testloader, num_epochs)
