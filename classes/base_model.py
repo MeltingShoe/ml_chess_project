@@ -47,7 +47,6 @@ def generate_class(params):
         '''
         self.use_cuda = use_cuda and torch.cuda.is_available()
         # We might have to add logic in here to set the filepath, not sure
-        self.
         if self.use_cuda:
             self.cuda()
             # From what I can tell this is what actually enables cuda
@@ -71,7 +70,7 @@ def generate_class(params):
             self.evaluate(self.feed_forward, test_data)
 
         utils.save_params(
-            self.feed_forward.state_dict(), self.filepath)
+            self.feed_forward.state_dict())
     # not sure if this actually does anything
 
     def cuda(self):
@@ -97,7 +96,7 @@ def check_params(params):
     #check if keys exists in the dictionary
     first_check = False
     type_check = False
-    keys_check = set('learning_rate', 'loss_function', 'name', 'optimizer', 'ff', 'tr', 'pa').issubset(params)
+    keys_check = set(['learning_rate', 'loss_function', 'name', 'optimizer', 'ff', 'tr', 'pa']).issubset(params)
     if keys_check:
         lr = params['learning_rate']
         lf = params['loss_function']
@@ -108,8 +107,8 @@ def check_params(params):
         pa = params['pa']
 
         #check on ff, tr, pa
-        first_check = issubclass(ff, nn.Module) and inspect.isfunction(tr) and inspect.isfunction(pa)
-        #not completely sure if the last two 'has_attr' work as i think
-        type_check = isinstance(lr, float) and lr < 1 and isinstance(name, str) and hasattr(nn, lf) and hasattr(optim, opt)
+        first_check = issubclass(ff.__class__, nn.Module) and inspect.isfunction(tr) and inspect.isfunction(pa)
+        #not completely sure if the last two 'has_attr' work as i think (confirmed that it doesn't)
+        type_check = isinstance(lr, float) and lr < 1 and isinstance(name, str) #and hasattr(nn, lf) and hasattr(optim, opt)
 
     return first_check and type_check
