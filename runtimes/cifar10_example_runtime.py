@@ -1,10 +1,11 @@
 import os
+
+import models.model_defs as model
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
-import models.model_defs as model
 
 
 class runtime():
@@ -44,7 +45,7 @@ if __name__ == "__main__":  # Required to allow multiprocessing on windows
     testloader = torch.utils.data.DataLoader(testset, batch_size=96,
                                              shuffle=False, num_workers=4)
 
-    network = model.cifar10_model(filepath=save_model_path, resume=True)
+    network = model.cifar10_model(resume=True)
 
     # Train the model
     num_epochs = 10
