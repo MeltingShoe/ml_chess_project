@@ -34,13 +34,14 @@ def PA_legal_move_values(self):
     i = 0
     while(i < len(legal_moves)):
         self.env.alt_step(legal_moves[i])
-        board = observation_space[0]
-        # Extremely lazy and hacky because pytorch was cooperating
-        board = board.tolist()
-        board = [[board]]
-        board = torch.cuda.FloatTensor(board)
-        board = Variable(board)
-        out = self.feed_forward(board).data.cpu().numpy()
+        board = self.env._get_array_state()
+        board = board[0]
+        # Extremely lazy and hacky because pytorch wasn't cooperating
+        x = board.tolist()
+        x = [[x]]
+        x = torch.cuda.FloatTensor(x)
+        x = torch.autograd.Variable(x)
+        out = self.feed_forward(x).data.cpu().numpy()
         evals[legal_moves[i]] = out
         self.env.alt_reset()
         i += 1

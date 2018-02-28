@@ -27,10 +27,10 @@ cifar10_model = generate_class(cifar_10_params)
 test_chess_net_params = {
     'name': 'test_chess_net',
     'ff': ff.TestChessNet(),
-    'tr': tr.default_train,
+    'tr': tr.test_chess_train,
     'pa': pa.PA_legal_move_values,
     'learning_rate': 0.001,
     'optimizer': optim.Adam,
-    'loss_function': nn.CrossEntropyLoss
+    'loss_function': nn.L1Loss
 }
 tcn = generate_class(test_chess_net_params)

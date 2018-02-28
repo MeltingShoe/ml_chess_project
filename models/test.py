@@ -7,3 +7,5 @@ if __name__ == '__main__':
     a, b = run.play_episode()
     c = run.calc_future_reward(a, b, 0.5)
     print(c)
+    run.training_session(c['white_states'], c['white_rewards'], 10)
+    run.training_session(c['black_states'], c['black_rewards'], 10)

@@ -67,11 +67,10 @@ def generate_class(params):
             self.start_epoch = 0
             utils.initialize_weights(self.feed_forward.modules())
 
-    def training_session(self, train_data, test_data, n_epochs):
+    def training_session(self, inputs, labels, n_epochs):
         """function to manage the train session"""
         for epoch in range(self.start_epoch, n_epochs, 1):
-            self.train(self.feed_forward, train_data, epoch)
-            self.evaluate(self.feed_forward, test_data)
+            self.train(self.feed_forward, inputs, labels, epoch)
 
         utils.save_params(
             self.feed_forward.state_dict(), self.name)
@@ -99,10 +98,10 @@ def generate_class(params):
         black_rewards = []
         while(i < len(states)):
             if(i % 2 == 0):
-                white_states.append(states[i])
+                white_states.append(states[i].tolist())
                 white_rewards.append(rewards[i])
             else:
-                black_states.append(states[i])
+                black_states.append(states[i].tolist())
                 black_rewards.append(rewards[i])
             i += 1
         # calc future reward
