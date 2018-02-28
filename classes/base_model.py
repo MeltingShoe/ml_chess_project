@@ -28,15 +28,16 @@ def generate_class(params):
     explicitely define the abstract methods in here
     I don't think it really matters though because explicitely defining the
     methods should prevent any inheritance issues
+    Update: no longer uses ABC because it caused problems
     '''
-    superclasses = (BaseModel,)
+    superclasses = (object,)
 
     '''
     I felt that defining training params inside the model was cleaner and
     made usage easier. I also set defaults for everything,
     we can change these if we want
     '''
-    #check if all the params are correct
+    # check if all the params are correct
     if not check_params(params):
         return None
 

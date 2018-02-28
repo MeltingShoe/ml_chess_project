@@ -33,4 +33,4 @@ test_chess_net_params = {
     'optimizer': optim.Adam,
     'loss_function': nn.CrossEntropyLoss
 }
-test_chess_net_model = generate_class(test_chess_net_params)
+tcn = generate_class(test_chess_net_params)
