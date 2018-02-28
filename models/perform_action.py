@@ -42,10 +42,9 @@ def PA_legal_move_values(self):
         board = [[board]]
         board = torch.cuda.FloatTensor(board)
         board = Variable(board)
-        out = self.feed_forward(board)
-        print(i)
+        out = self.feed_forward(board).data.cpu().numpy()
         evals[legal_moves[i]] = out
         self.env.alt_reset()
         i += 1
-    move = max(evals.iteritems(), key=operator.itemgetter(1))[0]
-    self.env._step(move)
+    move = max(evals.items(), key=operator.itemgetter(1))[0]
+    return self.env._step(move)
