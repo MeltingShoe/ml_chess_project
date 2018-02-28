@@ -6,6 +6,7 @@ import torch
 import os
 import datetime
 
+
 def save_params(state_dict, model_name):
     """save model to file """
     path = get_filepath(model_name)
@@ -38,6 +39,7 @@ def load_checkpoint(model):
         print("=> no checkpoint found at '{}'".format(filepath))
         return False
 
+
 def initialize_weights(modules, mean=0.0, variance=0.1, bias=0):
     """ intialize network weights as Normal Distribution of given mean and variance """
     for module in modules:
@@ -45,6 +47,7 @@ def initialize_weights(modules, mean=0.0, variance=0.1, bias=0):
             module.weight.data.normal_(mean, variance)
         if hasattr(module, "bias"):
             module.bias.data.fill_(bias)
+
 
 def get_filepath(model_name, checkpoint=False):
     if checkpoint:
@@ -55,3 +58,21 @@ def get_filepath(model_name, checkpoint=False):
     filepath = os.path.join('Saves', filename)
     return filepath
 
+
+def discount_reward(rewards_list, discount_factor):
+    '''
+    might not be the most efficient
+    rewards_list must be a list with only the rewards
+    training data must be split seperately
+    '''
+    i = 0
+    while i < len(rewards_list):
+        j = i
+        exp = 1
+        while j > 1:
+            _ = rewards_list[i]
+            rewards_list[j - 1] += _ * discount_factor**exp
+            j -= 1
+            exp += 1
+        i += 1
+    return rewards_list
