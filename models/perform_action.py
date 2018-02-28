@@ -28,8 +28,6 @@ def supervised_evaluate(self, feed_forward, dataloader):
 
 
 def PA_legal_move_values(self):
-    # print for debugging
-    print('PA start')
     observation_space = self.env._get_array_state()
     legal_moves = observation_space[1]
     evals = {}

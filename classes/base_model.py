@@ -75,6 +75,21 @@ def generate_class(params):
 
         utils.save_params(
             self.feed_forward.state_dict(), self.name)
+
+    def play_episode(self):
+        self.env._reset()
+        states = []
+        rewards = []
+        while True:
+            # going to have to add more complex logic for policy estimation networks
+            a = self.perform_action()
+            states.append(a[0][0])
+            rewards.append(a[1])
+            print(a[2])
+            if(a[2] == True):
+                return states, rewards
+
+
     # not sure if this actually does anything
 
     def cuda(self):
@@ -92,7 +107,8 @@ def generate_class(params):
              'learning_rate': params['learning_rate'],
              'optimizer': params['optimizer'](params['ff'].parameters(), lr=params['learning_rate']),
              'loss_function': params['loss_function'](),
-             'env': gym.make('chess-v0')
+             'env': gym.make('chess-v0'),
+             'play_episode': play_episode
              }
     base_model = type('base_model', superclasses, attrs)
     return base_model
