@@ -86,8 +86,36 @@ def generate_class(params):
             states.append(a[0][0])
             rewards.append(a[1])
             print(a[2])
+            # not taking the effort to come up with a proper struct because that's planned for later
             if(a[2] == True):
                 return states, rewards
+
+    def calc_future_reward(self, states, rewards, discount_factor):
+        # split states/rewards into their two sides
+        i = 0
+        white_states = []
+        white_rewards = []
+        black_states = []
+        black_rewards = []
+        while(i < len(states)):
+            if(i % 2 == 0):
+                white_states.append(states[i])
+                white_rewards.append(rewards[i])
+            else:
+                black_states.append(states[i])
+                black_rewards.append(rewards[i])
+            i += 1
+        # calc future reward
+        white_rewards = utils.discount_reward(white_rewards, discount_factor)
+        black_rewards = utils.discount_reward(black_rewards, discount_factor)
+        training_data = {
+        'white_states': white_states,
+        'white_rewards': white_rewards,
+        'black_states': black_states,
+        'black_rewards': black_rewards
+        }
+        return training_data
+
 
 
     # not sure if this actually does anything
@@ -108,7 +136,8 @@ def generate_class(params):
              'optimizer': params['optimizer'](params['ff'].parameters(), lr=params['learning_rate']),
              'loss_function': params['loss_function'](),
              'env': gym.make('chess-v0'),
-             'play_episode': play_episode
+             'play_episode': play_episode,
+             'calc_future_reward': calc_future_reward
              }
     base_model = type('base_model', superclasses, attrs)
     return base_model
