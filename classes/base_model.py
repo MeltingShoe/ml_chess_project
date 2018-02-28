@@ -85,7 +85,7 @@ def generate_class(params):
              'training_session': training_session,
              'cuda': cuda,
              'train': params['tr'],
-             'evaluate': params['pa'],
+             'perform_action': params['pa'],
              'feed_forward': params['ff'],
              'trainable_params': params['ff'].parameters(),
              'name': params['name'],
