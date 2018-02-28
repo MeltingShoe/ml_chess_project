@@ -4,6 +4,9 @@ import torch.nn as nn
 import torch.optim as optim
 from classes.interfaces import BaseModel
 import classes.utils as utils
+import gym
+import gym_chess
+
 
 '''
 This is "class factory" function that generates a new class for each model
@@ -87,7 +90,8 @@ def generate_class(params):
              'name': params['name'],
              'learning_rate': params['learning_rate'],
              'optimizer': params['optimizer'](params['ff'].parameters(), lr=params['learning_rate']),
-             'loss_function': params['loss_function']()
+             'loss_function': params['loss_function'](),
+             'env': gym.make('chess-v0')
              }
     base_model = type('base_model', superclasses, attrs)
     return base_model

@@ -15,7 +15,7 @@ to simplify imports
 # feed_forward must be passed as an instance
 cifar_10_params = {
     'name': 'cifar_10_model',
-    'ff': ff.BasicConvNet(),   
+    'ff': ff.BasicConvNet(),
     'tr': tr.default_train,
     'pa': pa.supervised_evaluate,
     'learning_rate': 0.001,
