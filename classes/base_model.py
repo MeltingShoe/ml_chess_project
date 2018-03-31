@@ -107,9 +107,10 @@ def generate_class(params):
                 black_rewards.append(rewards[i])
             i += 1
         # calc future reward
-        print(white_states)
         white_rewards = torch.Tensor(utils.discount_reward(white_rewards, discount_factor))
         black_rewards = torch.Tensor(utils.discount_reward(black_rewards, discount_factor))
+        white_rewards = white_rewards.unsqueeze(1)
+        black_rewards = black_rewards.unsqueeze(1)
         white_states = torch.Tensor(np.array(white_states).tolist())
         black_states = torch.Tensor(np.array(black_states).tolist())
 
