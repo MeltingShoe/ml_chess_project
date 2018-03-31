@@ -1,11 +1,11 @@
-'''
-This is a utilities module for any methods often used by other modules
-Things like saving models and parsing board states go here
-'''
 import torch
 import os
 import datetime
-
+import numpy as np
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import torch.utils.data as data_utils
 
 def save_params(state_dict, model_name):
     """save model to file """
@@ -77,3 +77,48 @@ def discount_reward(rewards_list, discount_factor):
         i += 1
     return rewards_list
 
+#splits up black and whites training data
+def split_episode_data(states, rewards):
+    i = 0
+    white_states = []
+    white_rewards = []
+    black_states = []
+    black_rewards = []
+    while(i < len(states)):
+        if(i % 2 == 0):
+            white_states.append(states[i])
+            white_rewards.append(rewards[i])
+        else:
+            black_states.append(states[i])
+            black_rewards.append(rewards[i])
+        i += 1
+    out = {
+    'white_states': white_states,
+    'white_rewards': white_rewards,
+    'black_states': black_states,
+    'black_rewards': black_rewards
+    }
+    return out
+
+def create_dataloader(states, rewards):
+    states = torch.Tensor(np.array(states).tolist())
+    rewards = torch.Tensor(rewards).unsqueeze(1)
+    dataset = data_utils.TensorDataset(states, rewards)
+    dataloader = data_utils.DataLoader(dataset)
+    return dataloader
+
+#encapsulates split_episode_data, discount_reward, and create_dataloader    
+def process_raw_data(states, rewards, discount_factor, cat=True):
+    split = split_episode_data(states, rewards)
+    white_rewards = discount_reward(split['white_rewards'], discount_factor)
+    black_rewards = discount_reward(split['black_rewards'], discount_factor)
+    if cat:
+        states = split['white_states']+split['black_states']
+        rewards = white_rewards + black_rewards
+        dataloader = create_dataloader(states, rewards)
+        return dataloader
+    split_data = {
+        'white_data': create_dataloader(split['white_states'], white_rewards),
+        'black_data': create_dataloader(split['black_states'], black_rewards)
+    }
+    return split_data

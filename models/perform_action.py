@@ -46,6 +46,7 @@ def PA_legal_move_values(self):
     out = {
     'state': start_pos,
     'reward': envOut[1],
-    'isTerminated': envOut[2]
+    'isTerminated': envOut[2],
+    'move': move
     }
     return out
