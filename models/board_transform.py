@@ -18,3 +18,9 @@ def hacky_workaround(self):
     x = torch.cuda.FloatTensor(x)
     x = torch.autograd.Variable(x)
     return x
+
+def noTransform(self):
+    board = self.env._get_array_state()
+    board = board[0]
+    board = torch.cuda.FloatTensor(board)
+    return board

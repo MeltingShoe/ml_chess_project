@@ -76,3 +76,4 @@ def discount_reward(rewards_list, discount_factor):
             exp += 1
         i += 1
     return rewards_list
+

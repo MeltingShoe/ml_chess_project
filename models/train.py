@@ -8,7 +8,7 @@ def default_train(self, feed_forward, dataloader,
     """function to train the network """
     epoch_loss = 0.0
     for i, data in enumerate(dataloader, starting_index):
-        inputs, labels = data  # get inputs and labels
+        inputs, labels = data  # get inputs and labels 
         if self.use_cuda:
             inputs, labels = inputs.cuda(), labels.cuda()
 
@@ -38,28 +38,16 @@ def default_train(self, feed_forward, dataloader,
     utils.save_checkpoint(checkpoint, self.name)
 
 
-def test_chess_train(self, feed_forward, inputs, labels,
-                     epoch, starting_index=0, print_batch=False):
+def chess_train(self, feed_forward, dataset,
+                  epoch, starting_index=0, print_batch=False):
     """function to train the network """
     epoch_loss = 0.0
-    for i, data in enumerate(inputs, starting_index):
-        '''
+    dataloader = 'placeholder'
+    for i, data in enumerate(dataloader, starting_index):
+        inputs, labels = data  # get inputs and labels 
         if self.use_cuda:
             inputs, labels = inputs.cuda(), labels.cuda()
-        '''
 
-        '''
-        inputs = inputs.tolist()
-        inputs = [[inputs]]
-        inputs = torch.cuda.FloatTensor(inputs)
-        labels = torch.cuda.FloatTensor(labels)
-        '''
-        # honestly I should just not be lazy and figure out how to use dataLoader
-        inputs = inputs[i]
-        labels = [labels[i]]
-        inputs = [[inputs]]
-        inputs = torch.cuda.FloatTensor(inputs)
-        labels = torch.cuda.FloatTensor(labels)
         inputs = Variable(inputs)
         labels = Variable(labels)
 

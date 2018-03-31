@@ -29,15 +29,23 @@ def supervised_evaluate(self, feed_forward, dataloader):
 
 def PA_legal_move_values(self):
     observation_space = self.env._get_array_state()
+    start_pos = observation_space[0]
     legal_moves = observation_space[1]
     evals = {}
     i = 0
     while(i < len(legal_moves)):
         self.env.alt_step(legal_moves[i])
         board = self.board()
+        board = Variable(board)
         out = self.feed_forward(board).data.cpu().numpy()
         evals[legal_moves[i]] = out
         self.env.alt_reset()
         i += 1
     move = max(evals.items(), key=operator.itemgetter(1))[0]
-    return self.env._step(move)
+    envOut = self.env._step(move)
+    out = {
+    'state': start_pos,
+    'reward': envOut[1],
+    'isTerminated': envOut[2]
+    }
+    return out
