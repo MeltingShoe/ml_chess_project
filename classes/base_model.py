@@ -2,8 +2,12 @@ import inspect
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from classes.interfaces import BaseModel
+import torch.utils.data as data_utils
 import classes.utils as utils
+import gym
+import gym_chess
+import numpy as np
+
 
 '''
 This is "class factory" function that generates a new class for each model
@@ -25,15 +29,16 @@ def generate_class(params):
     explicitely define the abstract methods in here
     I don't think it really matters though because explicitely defining the
     methods should prevent any inheritance issues
+    Update: no longer uses ABC because it caused problems
     '''
-    superclasses = (BaseModel,)
+    superclasses = (object,)
 
     '''
     I felt that defining training params inside the model was cleaner and
     made usage easier. I also set defaults for everything,
     we can change these if we want
     '''
-    #check if all the params are correct
+    # check if all the params are correct
     if not check_params(params):
         return None
 
@@ -63,40 +68,59 @@ def generate_class(params):
             self.start_epoch = 0
             utils.initialize_weights(self.feed_forward.modules())
 
-    def training_session(self, train_data, test_data, n_epochs):
+    def training_session(self, dataset, n_epochs):
         """function to manage the train session"""
         for epoch in range(self.start_epoch, n_epochs, 1):
-            self.train(self.feed_forward, train_data, epoch)
-            self.evaluate(self.feed_forward, test_data)
+            self.train(self.feed_forward, dataset, epoch)
 
         utils.save_params(
             self.feed_forward.state_dict(), self.name)
+
+    def play_episode(self):
+        self.env._reset()
+        states = []
+        rewards = []
+        while True:
+            # going to have to add more complex logic for policy estimation networks
+            a = self.perform_action()
+            states.append(a['state'])
+            rewards.append(a['reward'])
+            # not taking the effort to come up with a proper struct because that's planned for later
+            if(a['isTerminated'] == True):
+                print(sum(rewards), len(rewards))
+                return states, rewards
+
     # not sure if this actually does anything
 
     def cuda(self):
         self.use_cuda = True
 
-    #we should check if params are rendundant (e.g. optimizer and learning rate) or if we need other params
+    # we should check if params are rendundant (e.g. optimizer and learning rate) or if we need other params
     attrs = {'__init__': init,
              'training_session': training_session,
              'cuda': cuda,
              'train': params['tr'],
-             'evaluate': params['pa'],
+             'perform_action': params['pa'],
              'feed_forward': params['ff'],
              'trainable_params': params['ff'].parameters(),
              'name': params['name'],
              'learning_rate': params['learning_rate'],
              'optimizer': params['optimizer'](params['ff'].parameters(), lr=params['learning_rate']),
-             'loss_function': params['loss_function']()
+             'loss_function': params['loss_function'](),
+             'env': gym.make('chess-v0'),
+             'play_episode': play_episode,
+             'board': params['bt']
              }
     base_model = type('base_model', superclasses, attrs)
     return base_model
 
+
 def check_params(params):
-    #check if keys exists in the dictionary
+    # check if keys exists in the dictionary
     first_check = False
     type_check = False
-    keys_check = set(['learning_rate', 'loss_function', 'name', 'optimizer', 'ff', 'tr', 'pa']).issubset(params)
+    keys_check = set(['learning_rate', 'loss_function', 'name',
+                      'optimizer', 'ff', 'tr', 'pa']).issubset(params)
     if keys_check:
         lr = params['learning_rate']
         lf = params['loss_function']
@@ -106,9 +130,11 @@ def check_params(params):
         tr = params['tr']
         pa = params['pa']
 
-        #check on ff, tr, pa
-        first_check = issubclass(ff.__class__, nn.Module) and inspect.isfunction(tr) and inspect.isfunction(pa)
-        #not completely sure if the last two 'has_attr' work as i think (confirmed that it doesn't)
-        type_check = isinstance(lr, float) and lr < 1 and isinstance(name, str) #and hasattr(nn, lf) and hasattr(optim, opt)
+        # check on ff, tr, pa
+        first_check = issubclass(ff.__class__, nn.Module) and inspect.isfunction(
+            tr) and inspect.isfunction(pa)
+        # not completely sure if the last two 'has_attr' work as i think (confirmed that it doesn't)
+        type_check = isinstance(lr, float) and lr < 1 and isinstance(
+            name, str)  # and hasattr(nn, lf) and hasattr(optim, opt)
 
     return first_check and type_check

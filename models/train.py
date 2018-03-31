@@ -1,5 +1,6 @@
 import classes.utils as utils
 from torch.autograd import Variable
+import torch
 
 
 def default_train(self, feed_forward, dataloader,
@@ -7,7 +8,7 @@ def default_train(self, feed_forward, dataloader,
     """function to train the network """
     epoch_loss = 0.0
     for i, data in enumerate(dataloader, starting_index):
-        inputs, labels = data  # get inputs and labels
+        inputs, labels = data  # get inputs and labels 
         if self.use_cuda:
             inputs, labels = inputs.cuda(), labels.cuda()
 
@@ -35,3 +36,4 @@ def default_train(self, feed_forward, dataloader,
         'optimizer': self.optimizer.state_dict(),
     }
     utils.save_checkpoint(checkpoint, self.name)
+
