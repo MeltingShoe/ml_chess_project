@@ -2,6 +2,7 @@ from classes.base_model import generate_class
 import models.feed_forward as ff
 import models.train as tr
 import models.perform_action as pa
+import models.board_transform as bt
 import torch.nn as nn
 import torch.optim as optim
 
@@ -18,6 +19,7 @@ cifar_10_params = {
     'ff': ff.BasicConvNet(),
     'tr': tr.default_train,
     'pa': pa.supervised_evaluate,
+    'bt': bt.hacky_workaround,
     'learning_rate': 0.001,
     'optimizer': optim.Adam,
     'loss_function': nn.CrossEntropyLoss
@@ -29,6 +31,7 @@ test_chess_net_params = {
     'ff': ff.TestChessNet(),
     'tr': tr.test_chess_train,
     'pa': pa.PA_legal_move_values,
+    'bt': bt.hacky_workaround,
     'learning_rate': 0.001,
     'optimizer': optim.Adam,
     'loss_function': nn.L1Loss

@@ -108,21 +108,19 @@ def generate_class(params):
         white_rewards = utils.discount_reward(white_rewards, discount_factor)
         black_rewards = utils.discount_reward(black_rewards, discount_factor)
         training_data = {
-        'white_states': white_states,
-        'white_rewards': white_rewards,
-        'black_states': black_states,
-        'black_rewards': black_rewards
+            'white_states': white_states,
+            'white_rewards': white_rewards,
+            'black_states': black_states,
+            'black_rewards': black_rewards
         }
         return training_data
-
-
 
     # not sure if this actually does anything
 
     def cuda(self):
         self.use_cuda = True
 
-    #we should check if params are rendundant (e.g. optimizer and learning rate) or if we need other params
+    # we should check if params are rendundant (e.g. optimizer and learning rate) or if we need other params
     attrs = {'__init__': init,
              'training_session': training_session,
              'cuda': cuda,
@@ -136,16 +134,19 @@ def generate_class(params):
              'loss_function': params['loss_function'](),
              'env': gym.make('chess-v0'),
              'play_episode': play_episode,
-             'calc_future_reward': calc_future_reward
+             'calc_future_reward': calc_future_reward,
+             'board': params['bt']
              }
     base_model = type('base_model', superclasses, attrs)
     return base_model
 
+
 def check_params(params):
-    #check if keys exists in the dictionary
+    # check if keys exists in the dictionary
     first_check = False
     type_check = False
-    keys_check = set(['learning_rate', 'loss_function', 'name', 'optimizer', 'ff', 'tr', 'pa']).issubset(params)
+    keys_check = set(['learning_rate', 'loss_function', 'name',
+                      'optimizer', 'ff', 'tr', 'pa']).issubset(params)
     if keys_check:
         lr = params['learning_rate']
         lf = params['loss_function']
@@ -155,9 +156,11 @@ def check_params(params):
         tr = params['tr']
         pa = params['pa']
 
-        #check on ff, tr, pa
-        first_check = issubclass(ff.__class__, nn.Module) and inspect.isfunction(tr) and inspect.isfunction(pa)
-        #not completely sure if the last two 'has_attr' work as i think (confirmed that it doesn't)
-        type_check = isinstance(lr, float) and lr < 1 and isinstance(name, str) #and hasattr(nn, lf) and hasattr(optim, opt)
+        # check on ff, tr, pa
+        first_check = issubclass(ff.__class__, nn.Module) and inspect.isfunction(
+            tr) and inspect.isfunction(pa)
+        # not completely sure if the last two 'has_attr' work as i think (confirmed that it doesn't)
+        type_check = isinstance(lr, float) and lr < 1 and isinstance(
+            name, str)  # and hasattr(nn, lf) and hasattr(optim, opt)
 
     return first_check and type_check
