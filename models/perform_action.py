@@ -3,6 +3,8 @@ from torch.autograd import Variable
 import operator
 import numpy as np
 import random
+import torch.nn.functional as F
+import time
 
 def supervised_evaluate(self, feed_forward, dataloader):
     correct_count = 0
@@ -31,40 +33,37 @@ def PA_legal_move_values(self):
     observation_space = self.env._get_array_state()
     start_pos = self.board()
     legal_moves = observation_space[1]
-    evals = {}
+    outputs = torch.cuda.FloatTensor(0).zero_()
     i = 0
+    start = time.time()
     while(i < len(legal_moves)):
         self.env.alt_step(legal_moves[i])
         board = self.board()
-        # this might break the app for people without cuda
         board = torch.cuda.FloatTensor(board)
         board = Variable(board)
         '''
         I literally have no idea what .data.cpu().numpy() does or if it
         slows anything down but it doesn't work without it
         '''
-        out = self.feed_forward(board).data.cpu().numpy()
-        evals[legal_moves[i]] = out
+        out = self.feed_forward(board).data
+        outputCat = torch.cat((outputs, out), 0)
+        outputs = outputCat
         self.env.alt_reset()
         i += 1
-
-    # quickest way i could think to add rng because i wanna train while i sleep
-    i = 0
-    moves = []
-    while(i < 3):
-        if evals:
-            move = max(evals.items(), key=operator.itemgetter(1))[0]
-            moves.append(move)
-            evals.pop(move, None)
-            if i == 2:
-                rng = random.randint(0,2)
-        else:
-            moves = legal_moves
-            rng = 0
-        i += 1
-    
-    move = moves[rng]
-
+    print('ff', time.time()-start)
+    outputs = Variable(outputs)
+    outputs = F.softmax(outputs, dim=0).data.tolist()
+    rng = random.random()
+    count = 0
+    index = 0
+    while(count < rng):
+        count += outputs[index][0]
+        index += 1
+    move_len = len(legal_moves)
+    if(index >= move_len):
+        move = legal_moves[move_len-1]
+    else:
+        move = legal_moves[index]
 
 
     envOut = self.env._step(move)

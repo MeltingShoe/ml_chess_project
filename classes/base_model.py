@@ -70,7 +70,7 @@ def generate_class(params):
 
     def training_session(self, dataset, n_epochs):
         """function to manage the train session"""
-        for epoch in range(self.start_epoch, n_epochs, 1):
+        for epoch in range(0, n_epochs, 1):
             self.train(self.feed_forward, dataset, epoch)
 
         utils.save_params(
@@ -81,7 +81,6 @@ def generate_class(params):
         states = []
         rewards = []
         while True:
-            # going to have to add more complex logic for policy estimation networks
             a = self.perform_action()
             states.append(a['state'])
             rewards.append(a['reward'])

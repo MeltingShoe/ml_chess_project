@@ -18,6 +18,6 @@ if __name__ == '__main__':
         	run.learning_rate == 0.001
         length = len(b)
         c = utils.process_raw_data(a, b, 0.5)
-        run.training_session(c, 5)
-        run.start_epoch = 0
+        n_epochs = 5
+        run.training_session(c, n_epochs)
         i += 1
