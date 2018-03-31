@@ -2,7 +2,7 @@ import torch
 from torch.autograd import Variable
 import operator
 import numpy as np
-
+import random
 
 def supervised_evaluate(self, feed_forward, dataloader):
     correct_count = 0
@@ -29,19 +29,44 @@ def supervised_evaluate(self, feed_forward, dataloader):
 
 def PA_legal_move_values(self):
     observation_space = self.env._get_array_state()
-    start_pos = observation_space[0]
+    start_pos = self.board()
     legal_moves = observation_space[1]
     evals = {}
     i = 0
     while(i < len(legal_moves)):
         self.env.alt_step(legal_moves[i])
         board = self.board()
+        # this might break the app for people without cuda
+        board = torch.cuda.FloatTensor(board)
         board = Variable(board)
+        '''
+        I literally have no idea what .data.cpu().numpy() does or if it
+        slows anything down but it doesn't work without it
+        '''
         out = self.feed_forward(board).data.cpu().numpy()
         evals[legal_moves[i]] = out
         self.env.alt_reset()
         i += 1
-    move = max(evals.items(), key=operator.itemgetter(1))[0]
+
+    # quickest way i could think to add rng because i wanna train while i sleep
+    i = 0
+    moves = []
+    while(i < 3):
+        if evals:
+            move = max(evals.items(), key=operator.itemgetter(1))[0]
+            moves.append(move)
+            evals.pop(move, None)
+            if i == 2:
+                rng = random.randint(0,2)
+        else:
+            moves = legal_moves
+            rng = 0
+        i += 1
+    
+    move = moves[rng]
+
+
+
     envOut = self.env._step(move)
     out = {
     'state': start_pos,
@@ -50,3 +75,4 @@ def PA_legal_move_values(self):
     'move': move
     }
     return out
+

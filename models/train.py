@@ -30,7 +30,6 @@ def default_train(self, feed_forward, dataloader,
 
     # save at the end of every epoch
     # we can save how many information as we want
-    print('here')
     checkpoint = {
         'epoch': epoch + 1,
         'state_dict': feed_forward.state_dict(),

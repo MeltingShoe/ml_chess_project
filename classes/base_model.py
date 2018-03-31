@@ -3,7 +3,6 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as data_utils
-from classes.interfaces import BaseModel
 import classes.utils as utils
 import gym
 import gym_chess
@@ -88,7 +87,7 @@ def generate_class(params):
             rewards.append(a['reward'])
             # not taking the effort to come up with a proper struct because that's planned for later
             if(a['isTerminated'] == True):
-                print('isTerminated')
+                print(sum(rewards), len(rewards))
                 return states, rewards
 
     # not sure if this actually does anything
