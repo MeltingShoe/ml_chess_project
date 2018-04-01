@@ -35,7 +35,6 @@ def PA_legal_move_values(self):
     legal_moves = observation_space[1]
     outputs = torch.cuda.FloatTensor(0).zero_()
     i = 0
-    start = time.time()
     while(i < len(legal_moves)):
         self.env.alt_step(legal_moves[i])
         board = self.board()
@@ -50,7 +49,6 @@ def PA_legal_move_values(self):
         outputs = outputCat
         self.env.alt_reset()
         i += 1
-    print('ff', time.time()-start)
     outputs = Variable(outputs)
     outputs = F.softmax(outputs, dim=0).data.tolist()
     rng = random.random()

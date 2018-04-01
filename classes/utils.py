@@ -7,10 +7,12 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as data_utils
 
-def save_params(state_dict, model_name):
+def save_params(model, print_out=True):
     """save model to file """
-    path = get_filepath(model_name)
-    torch.save(state_dict, path)
+    if print_out:
+        print('Saving params. Epoch:', model.epoch)
+    path = get_filepath(model.name)
+    torch.save(model.feed_forward.state_dict(), path)
 
 
 def load_params(feed_forward, model_name):
@@ -19,8 +21,14 @@ def load_params(feed_forward, model_name):
     feed_forward.load_state_dict(torch.load(path))
 
 
-def save_checkpoint(state, model_name):
-    filepath = get_filepath(model_name, True)
+def save_checkpoint(model, print_out=True):
+    if print_out:
+        print('Saving checkpoint. Epoch:', model.epoch)
+    filepath = get_filepath(model.name, True)
+    state = {
+      'epoch': model.epoch,
+      'state_dict': model.feed_forward.state_dict(),
+      'optimizer': model.optimizer.state_dict()}
     torch.save(state, filepath)
 
 
@@ -29,7 +37,7 @@ def load_checkpoint(model):
     if os.path.isfile(filepath):
         print("=> loading checkpoint '{}'".format(filepath))
         checkpoint = torch.load(filepath)
-        model.start_epoch = checkpoint['epoch']
+        model.epoch = checkpoint['epoch']
         model.feed_forward.load_state_dict(checkpoint['state_dict'])
         model.optimizer.load_state_dict(checkpoint['optimizer'])
         print("=> loaded checkpoint '{}' (epoch {})"
@@ -122,3 +130,57 @@ def process_raw_data(states, rewards, discount_factor, cat=True):
         'black_data': create_dataloader(split['black_states'], black_rewards)
     }
     return split_data
+
+def training_session(model, dataset, n_epochs,
+    checkpoint_frequency=1, save_param_frequency=10, 
+    starting_index=0, print_batch=False, 
+    print_checkpoint=True, print_saves=True):
+    """function to manage the train session"""
+    for epoch in range(0, n_epochs, 1):
+        model.train(dataset, 
+            starting_index=starting_index, 
+            print_batch=print_batch)
+        if(checkpoint_frequency is not None):
+            if(model.epoch % checkpoint_frequency == 0):
+                save_checkpoint(model, print_out=print_checkpoint)
+        if(save_param_frequency is not None):
+            if(model.epoch % save_param_frequency == 0):
+                save_params(model, print_out=print_saves)
+
+def play_episode(model, half_turn_limit=2000, print_rewards=True):
+    model.env._reset()
+    states = []
+    rewards = []
+    i = 0
+    while True:
+        a = model.perform_action()
+        states.append(a['state'])
+        rewards.append(a['reward'])
+        if(a['isTerminated'] == True or i > half_turn_limit):
+            if print_rewards:
+                print(sum(rewards), len(rewards))
+            return states, rewards
+        i += 1
+
+#This plays multiple episodes and packs them all in 1 dataloader. Improves speed by ~8%
+def generate_data(model, num_games, discount_factor,
+                  half_turn_limit=2000, print_rewards=True):
+    i = 0
+    states = []
+    rewards = []
+    while(i<num_games):
+        raw_state, raw_reward =play_episode(model, 
+            half_turn_limit=half_turn_limit, print_rewards=print_rewards)
+        split = split_episode_data(raw_state, raw_reward)
+        white_rewards = discount_reward(split['white_rewards'], discount_factor)
+        black_rewards = discount_reward(split['black_rewards'], discount_factor)
+        states += split['white_states']
+        states += split['black_states']
+        rewards += white_rewards
+        rewards += black_rewards
+        i+=1
+    dataloader = create_dataloader(states, rewards)
+    return dataloader
+
+ 
+
