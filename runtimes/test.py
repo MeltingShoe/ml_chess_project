@@ -1,10 +1,17 @@
 from models import model_defs
 from classes import utils
-from classes import mp_play
 import numpy as np
 import time
 import torch.multiprocessing as mp
 from torch.multiprocessing import Pool
+
+net = model_defs.fc_test
+n_epochs = 1
+discount_factor = 0.5
+run = net(resume = True)
+run.cuda()
+
+
 
 def pack_episode():
     a, b = utils.play_episode(net(resume=True))
@@ -15,8 +22,6 @@ def pack_episode():
     rewards = white_rewards + black_rewards
     out = {'states': states, 'rewards': rewards}
     return out
-
-
 
 if __name__ == '__main__':
 
@@ -33,6 +38,8 @@ if __name__ == '__main__':
         '''
         I have no idea what am doing and no matter what I tried I couldn't find a way to make the 
         number of total episodes dynamic. Multiprocessing is weird and difficult to work with.
+        Also this has a tendency to completely crash python if you do a keyboard interrupt sooooo...
+        It's interesting to note that it calls load_checkpoint twice for each process too
         '''
         with Pool(processes=threads) as pool:
             res = pool.apply_async(pack_episode)
