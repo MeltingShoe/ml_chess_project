@@ -42,21 +42,26 @@ def PA_legal_move_values(self):
         boards.append(board)
         self.env.alt_reset()
 
-    outputs = self.feed_forward(Variable(utils.FloatTensor([boards])))
+    outputs = self.feed_forward(Variable(utils.FloatTensor(np.concatenate(boards))))
 
-    outputs = F.softmax(outputs, dim=0).data.tolist()
-    rng = random.random()
-    count = 0
-    index = 0
-    while(count < rng):
-        count += outputs[index][0]
-        index += 1
-    move_len = len(legal_moves)
-    if(index >= move_len):
-        move = legal_moves[move_len-1]
-    else:
-        move = legal_moves[index]
+    outputs = F.softmax(outputs, dim=0).data.numpy().ravel()
 
+    s = sum(outputs)
+
+    outputs / np.sum(outputs)
+
+    move = np.random.choice(
+            len(outputs),
+            size=1,
+            p=outputs,
+        )
+
+    outputs = self.feed_forward(Variable(utils.FloatTensor(np.concatenate(boards))))
+    outputs = F.softmax(outputs, dim=0).data.numpy().ravel()
+    outputs = outputs / np.sum(outputs)
+
+    move_index = np.random.choice(len(outputs),size=1,p=outputs)[0]
+    move = legal_moves[move_index]
 
     envOut = self.env._step(move)
     out = {
