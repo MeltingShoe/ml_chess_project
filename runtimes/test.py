@@ -6,7 +6,7 @@ import torch.multiprocessing as mp
 from torch.multiprocessing import Pool
 
 net = model_defs.fc_test
-n_epochs = 1
+n_epochs = 20
 discount_factor = 0.5
 run = net(resume = True)
 run.cuda()
@@ -24,14 +24,6 @@ def pack_episode():
     return out
 
 if __name__ == '__main__':
-
-    net = model_defs.fc_test
-    n_epochs = 1
-    discount_factor = 0.5
-    run = net(resume = True)
-    run.cuda()
-
-
 
     def async(threads):
         stack = []
@@ -68,30 +60,17 @@ if __name__ == '__main__':
         dataloader = utils.create_dataloader(states_stack, rewards_stack)
         return dataloader
 
-    aStart = time.time()
+
     for i in range(10):
     	data = async_generate_data()
+    	#data = utils.generate_data(run, 5, discount_factor)
     	utils.training_session(run, data, n_epochs,
     							checkpoint_frequency=1, 
     							save_param_frequency=10, 
     							starting_index=0,
     							print_checkpoint=True, 
     							print_saves=True)
-    aTime = time.time() - aStart
 
-    seqStart = time.time()
-    for i in range(10):
-    	data = utils.generate_data(run, 5, discount_factor)
-    	utils.training_session(run, data, n_epochs,
-    							checkpoint_frequency=1, 
-    							save_param_frequency=10, 
-    							starting_index=0,
-    							print_checkpoint=True, 
-    							print_saves=True)
-    seqTime = time.time() - seqStart
-
-    print('async time:', aTime)
-    print('seq time:', seqTime)
 
 
 

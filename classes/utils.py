@@ -108,11 +108,11 @@ def split_episode_data(states, rewards):
     }
     return out
 
-def create_dataloader(states, rewards):
+def create_dataloader(states, rewards, batch_size=32):
     states = torch.Tensor(np.array(states).tolist())
     rewards = torch.Tensor(rewards).unsqueeze(1)
     dataset = data_utils.TensorDataset(states, rewards)
-    dataloader = data_utils.DataLoader(dataset)
+    dataloader = data_utils.DataLoader(dataset, batch_size=batch_size)
     return dataloader
 
 #encapsulates split_episode_data, discount_reward, and create_dataloader    
