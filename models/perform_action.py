@@ -34,23 +34,16 @@ def PA_legal_move_values(self):
     observation_space = self.env._get_array_state()
     start_pos = self.board()
     legal_moves = observation_space[1]
-    outputs = utils.FloatTensor(0).zero_()
     i = 0
-    while(i < len(legal_moves)):
+    boards = []
+    for i in range(len(legal_moves)):
         self.env.alt_step(legal_moves[i])
         board = self.board()
-        board = utils.FloatTensor(board)
-        board = Variable(board)
-        '''
-        I literally have no idea what .data.cpu().numpy() does or if it
-        slows anything down but it doesn't work without it
-        '''
-        out = self.feed_forward(board).data
-        outputCat = torch.cat((outputs, out), 0)
-        outputs = outputCat
+        boards.append(board)
         self.env.alt_reset()
-        i += 1
-    outputs = Variable(outputs)
+
+    outputs = self.feed_forward(Variable(utils.FloatTensor([boards])))
+
     outputs = F.softmax(outputs, dim=0).data.tolist()
     rng = random.random()
     count = 0
