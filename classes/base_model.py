@@ -62,33 +62,15 @@ def generate_class(params):
         if resume:
             # TODO decide a pattern for filenames
             if not utils.load_checkpoint(self):
-                self.start_epoch = 0
+                self.epoch = 0
                 utils.initialize_weights(self.feed_forward.modules())
         else:
-            self.start_epoch = 0
+            self.epoch = 0
             utils.initialize_weights(self.feed_forward.modules())
 
-    def training_session(self, dataset, n_epochs):
-        """function to manage the train session"""
-        for epoch in range(self.start_epoch, n_epochs, 1):
-            self.train(self.feed_forward, dataset, epoch)
 
-        utils.save_params(
-            self.feed_forward.state_dict(), self.name)
 
-    def play_episode(self):
-        self.env._reset()
-        states = []
-        rewards = []
-        while True:
-            # going to have to add more complex logic for policy estimation networks
-            a = self.perform_action()
-            states.append(a['state'])
-            rewards.append(a['reward'])
-            # not taking the effort to come up with a proper struct because that's planned for later
-            if(a['isTerminated'] == True):
-                print(sum(rewards), len(rewards))
-                return states, rewards
+
 
     # not sure if this actually does anything
 
@@ -97,7 +79,6 @@ def generate_class(params):
 
     # we should check if params are rendundant (e.g. optimizer and learning rate) or if we need other params
     attrs = {'__init__': init,
-             'training_session': training_session,
              'cuda': cuda,
              'train': params['tr'],
              'perform_action': params['pa'],
@@ -108,7 +89,6 @@ def generate_class(params):
              'optimizer': params['optimizer'](params['ff'].parameters(), lr=params['learning_rate']),
              'loss_function': params['loss_function'](),
              'env': gym.make('chess-v0'),
-             'play_episode': play_episode,
              'board': params['bt']
              }
     base_model = type('base_model', superclasses, attrs)

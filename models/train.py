@@ -3,8 +3,7 @@ from torch.autograd import Variable
 import torch
 
 
-def default_train(self, feed_forward, dataloader,
-                  epoch, starting_index=0, print_batch=False):
+def default_train(self, dataloader, starting_index=0, print_batch=False):
     """function to train the network """
     epoch_loss = 0.0
     for i, data in enumerate(dataloader, starting_index):
@@ -17,7 +16,7 @@ def default_train(self, feed_forward, dataloader,
 
         self.optimizer.zero_grad()  # zero parameters gradient
 
-        outputs = feed_forward(inputs)  # forward
+        outputs = self.feed_forward(inputs)  # forward
         loss = self.loss_function(outputs, labels)  # compute loss
         loss.backward()  # backpropagation
         self.optimizer.step()  # optimization
@@ -26,14 +25,6 @@ def default_train(self, feed_forward, dataloader,
 
         if print_batch:
             print('[{:d}, {:5d}] loss: {:.3f}'.format(
-                epoch + 1, i + 1, loss.data[0]))
+                self.epoch + 1, i + 1, loss.data[0]))
 
-    # save at the end of every epoch
-    # we can save how many information as we want
-    checkpoint = {
-        'epoch': epoch + 1,
-        'state_dict': feed_forward.state_dict(),
-        'optimizer': self.optimizer.state_dict(),
-    }
-    utils.save_checkpoint(checkpoint, self.name)
-
+    self.epoch += 1
