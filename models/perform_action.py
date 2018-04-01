@@ -5,6 +5,7 @@ import numpy as np
 import random
 import torch.nn.functional as F
 import time
+from classes import utils
 
 def supervised_evaluate(self, feed_forward, dataloader):
     correct_count = 0
@@ -33,12 +34,12 @@ def PA_legal_move_values(self):
     observation_space = self.env._get_array_state()
     start_pos = self.board()
     legal_moves = observation_space[1]
-    outputs = torch.cuda.FloatTensor(0).zero_()
+    outputs = utils.FloatTensor(0).zero_()
     i = 0
     while(i < len(legal_moves)):
         self.env.alt_step(legal_moves[i])
         board = self.board()
-        board = torch.cuda.FloatTensor(board)
+        board = utils.FloatTensor(board)
         board = Variable(board)
         '''
         I literally have no idea what .data.cpu().numpy() does or if it

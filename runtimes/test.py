@@ -12,7 +12,6 @@ run = net(resume = True)
 run.cuda()
 
 
-
 def pack_episode():
     a, b = utils.play_episode(net(resume=True))
     split = utils.split_episode_data(a, b)
@@ -24,6 +23,8 @@ def pack_episode():
     return out
 
 if __name__ == '__main__':
+
+    utils.ensure_dir(utils.SAVE_DIR)
 
     def async(threads):
         stack = []
