@@ -127,8 +127,6 @@ def create_dataloader(states, rewards, batch_size=32):
     dataloader = data_utils.DataLoader(dataset, batch_size=batch_size)
     return dataloader
 
-# encapsulates split_episode_data, discount_reward, and create_dataloader
-
 
 def process_raw_data(states, rewards, discount_factor, cat=True):
     split = split_episode_data(states, rewards)
@@ -146,13 +144,13 @@ def process_raw_data(states, rewards, discount_factor, cat=True):
     return split_data
 
 
-def training_session(model, dataset, n_epochs,
+def training_session(model, dataloader, n_epochs,
                      checkpoint_frequency=1, save_param_frequency=10,
                      starting_index=0, print_batch=False,
                      print_checkpoint=True, print_saves=True):
     """function to manage the train session"""
     for epoch in range(0, n_epochs, 1):
-        model.train(dataset,
+        model.train(dataloader,
                     starting_index=starting_index,
                     print_batch=print_batch)
         if(checkpoint_frequency is not None):
