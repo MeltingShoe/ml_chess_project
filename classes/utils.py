@@ -2,6 +2,7 @@ import torch
 import os
 import numpy as np
 import torch.utils.data as data_utils
+import time
 
 use_cuda = torch.cuda.is_available()
 FloatTensor = torch.cuda.FloatTensor if use_cuda else torch.FloatTensor
@@ -41,16 +42,18 @@ def save_checkpoint(model, print_out=True):
     torch.save(state, filepath)
 
 
-def load_checkpoint(model):
+def load_checkpoint(model, print_out=True):
     filepath = get_filepath(model.name, True)
     if os.path.isfile(filepath):
-        print("=> loading checkpoint '{}'".format(filepath))
+        if print_out:
+            print("=> loading checkpoint '{}'".format(filepath))
         checkpoint = torch.load(filepath)
         model.epoch = checkpoint['epoch']
         model.feed_forward.load_state_dict(checkpoint['state_dict'])
         model.optimizer.load_state_dict(checkpoint['optimizer'])
-        print("=> loaded checkpoint '{}' (epoch {})"
-              .format(filepath, checkpoint['epoch']))
+        if print_out:
+            print("=> loaded checkpoint '{}' (epoch {})"
+                  .format(filepath, checkpoint['epoch']))
         return True
     else:
         print("=> no checkpoint found at '{}'".format(filepath))
@@ -161,19 +164,30 @@ def training_session(model, dataloader, n_epochs,
                 save_params(model, print_out=print_saves)
 
 
-def play_episode(model, half_turn_limit=2000, print_rewards=True):
+def won(rewards):
+    if(sum(rewards) > 100):
+        return 1
+    else:
+        return 0
+
+
+def play_episode(model, half_turn_limit=2000, print_rewards=True, render=False, render_delay=1):
     model.env._reset()
     states = []
     rewards = []
     i = 0
     while True:
+        if render:
+            model.env._render()
+            time.sleep(render_delay)
         a = model.perform_action()
         states.append(a['state'])
         rewards.append(a['reward'])
         if a['isTerminated'] or i > half_turn_limit:
+            metrics = {'wins': won(rewards)}
             if print_rewards:
                 print(sum(rewards), len(rewards))
-            return states, rewards
+            return states, rewards, metrics
         i += 1
 
 # This plays multiple episodes and packs them all in 1 dataloader. Improves speed by ~8%
@@ -184,8 +198,9 @@ def generate_data(model, num_games, discount_factor,
     i = 0
     states = []
     rewards = []
+    metrics = {'wins':0}
     while(i < num_games):
-        raw_state, raw_reward = play_episode(model,
+        raw_state, raw_reward, raw_metrics = play_episode(model,
                                              half_turn_limit=half_turn_limit, print_rewards=print_rewards)
         split = split_episode_data(raw_state, raw_reward)
         white_rewards = discount_reward(
@@ -196,6 +211,7 @@ def generate_data(model, num_games, discount_factor,
         states += split['black_states']
         rewards += white_rewards
         rewards += black_rewards
+        metrics['wins'] += raw_metrics['wins']
         i += 1
     dataloader = create_dataloader(states, rewards)
-    return dataloader
+    return dataloader, metrics

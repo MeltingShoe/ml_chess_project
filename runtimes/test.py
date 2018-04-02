@@ -15,15 +15,15 @@ from torch.multiprocessing import Pool
 from classes import utils
 from models import model_defs
 
+
 net = model_defs.fc_test
 n_epochs = 20
 discount_factor = 0.5
-run = net(resume=True)
-run.cuda()
 
 
 def pack_episode():
-    a, b = utils.play_episode(net(resume=True))
+
+    a, b, metrics = utils.play_episode(net(resume=True, parent_process=False))
     split = utils.split_episode_data(a, b)
     white_rewards = utils.discount_reward(
         split['white_rewards'], discount_factor)
@@ -31,7 +31,7 @@ def pack_episode():
         split['black_rewards'], discount_factor)
     states = split['white_states'] + split['black_states']
     rewards = white_rewards + black_rewards
-    out = {'states': states, 'rewards': rewards}
+    out = {'states': states, 'rewards': rewards, 'metrics': metrics}
     return out
 
 
@@ -41,12 +41,6 @@ if __name__ == '__main__':
 
     def async(threads):
         stack = []
-        '''
-        I have no idea what am doing and no matter what I tried I couldn't find a way to make the 
-        number of total episodes dynamic. Multiprocessing is weird and difficult to work with.
-        Also this has a tendency to completely crash python if you do a keyboard interrupt sooooo...
-        It's interesting to note that it calls load_checkpoint twice for each process too
-        '''
         with Pool(processes=threads) as pool:
             res = pool.apply_async(pack_episode)
             res1 = pool.apply_async(pack_episode)
@@ -65,18 +59,26 @@ if __name__ == '__main__':
         rewards_stack = []
         states_stack = []
         c = 0
+        metrics = {'wins': 0}
         for _ in range(5):
             c += 1
             a = data.pop()
             rewards_stack += a['rewards']
             states_stack += a['states']
+            metrics['wins'] += a['metrics']['wins']
 
         dataloader = utils.create_dataloader(states_stack, rewards_stack)
-        return dataloader
+        return dataloader, metrics
 
-    for i in range(100000):
-        data = async_generate_data()
-        #data = utils.generate_data(run, 5, discount_factor)
+    num_wins = 0
+    num_games = 0
+    run = net(resume=True)
+    for i in range(3):
+        data, metrics = async_generate_data()
+        #data, metrics = utils.generate_data(run, 5, discount_factor)
+        num_wins += metrics['wins']
+        num_games += 5
+        print('Percent of games not drawn:', num_wins / num_games)
         utils.training_session(run, data, n_epochs,
                                checkpoint_frequency=1,
                                save_param_frequency=10,

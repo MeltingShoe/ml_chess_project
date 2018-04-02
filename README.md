@@ -44,12 +44,13 @@ model: The base container class of the model to be saved
 print_out=True: When True this will print a message to the console with the models current epoch
 ```
 
-## load_checkpoint(model)
+## load_checkpoint(model, print_out=True)
 Loads a checkpoint for a model. Currently used in the model class init if a checkpoint for that model is present.
 
 Parameters:
 ```
 model: The base container class of the model to be saved
+print_out=True: When True this will print a message to the console
 ```
 
 ## initialize_weights(modules, mean=0.0, variance=0.1, bias=0)
@@ -118,14 +119,19 @@ print_checkpoint=True: Whether to printout checkpoint saves
 print_saves=True: Whether to printout param saves
 ```
 
-## play_episode(model, half_turn_limit=2000, print_rewards=True)
-Plays a single game of chess with the model against itself and outputs raw training data
+## won(rewards)
+Outputs 1 if sum(rewards)>100, 0 otherwise
+
+## play_episode(model, half_turn_limit=2000, print_rewards=True, render=False, render_delay=1)
+Plays a single game of chess with the model against itself and outputs raw training data and a dictionary containing metrics, currently just whether the game was won.
 
 Parameters:
 ```
 model: The base container class of the model to be saved
 half_turn_limit=2000: The number of individual moves before this will terminate without waiting for the game to end
 print_rewards=True: If true this will print out the total of all rewards and the number of moves made
+render=False: If true the env will be rendered after every move
+render_delay=1: Delay in seconds between moves when rendering the board
 ```
 
 ## generate_data(model, num_games, discount_factor)
@@ -161,13 +167,14 @@ Parameters:
 'loss_function': The loss function to use
 ```
 
-## init(self, use_cuda=True, resume=True)
+## init(self, parent_process=True, use_cuda=True, resume=True)
 The classes init which sets whether cuda is used and loads a checkpoint if one exists, or initialized weights if it doesn't.
 
 Parameters:
 ```
 use_cuda=True: Whether cuda should be used.
 resume=True: If this is false new weights will be initialized no matter what. Be careful with this because the models old parameters will be overwritten.
+parent_process=True: This is set to false for async processes and determines whether to print the loading_checkpoint message. Unfortunately the async processes call init twice with the first time using the same params as main process so it still prints out the message, but at least it only prints 5 instead of 10 now. I have no idea why this is the case.
 ```
 
 ## cuda(self)

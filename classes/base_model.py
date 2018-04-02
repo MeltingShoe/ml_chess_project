@@ -43,24 +43,18 @@ def generate_class(params):
         print('check_params failed')
         return None
 
-    def init(self, use_cuda=True, resume=True):
-        ''''
-        Most of these attributes should be moved to the attrs dict
-        It would help readability and avoid some inheritence
-        collisions if that ever comes up
-        '''
+    def init(self, parent_process=True, use_cuda=True, resume=True):
+
         self.use_cuda = use_cuda and torch.cuda.is_available()
-        # We might have to add logic in here to set the filepath, not sure
         if self.use_cuda:
             self.cuda()
             # From what I can tell this is what actually enables cuda
             self.feed_forward.cuda()
-        '''
-        I'm fairly certain I broke saves/checkpoints
-        '''
+
         if resume:
             # TODO decide a pattern for filenames
-            if not utils.load_checkpoint(self):
+
+            if not utils.load_checkpoint(self, print_out=parent_process):
                 self.epoch = 0
                 utils.initialize_weights(self.feed_forward.modules())
         else:
