@@ -1,10 +1,6 @@
 import torch
 import os
-import datetime
 import numpy as np
-import torch
-import torch.nn as nn
-import torch.optim as optim
 import torch.utils.data as data_utils
 
 use_cuda = torch.cuda.is_available()
@@ -14,9 +10,11 @@ ByteTensor = torch.cuda.ByteTensor if use_cuda else torch.ByteTensor
 
 SAVE_DIR = "Saves"
 
+
 def ensure_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
+
 
 def save_params(model, print_out=True):
     """save model to file """
@@ -26,10 +24,10 @@ def save_params(model, print_out=True):
     torch.save(model.feed_forward.state_dict(), path)
 
 
-def load_params(feed_forward, model_name):
+def load_params(model):
     """ load model from file """
-    path = get_filepath(model_name)
-    feed_forward.load_state_dict(torch.load(path))
+    path = get_filepath(model.name)
+    model.feed_forward.load_state_dict(torch.load(path))
 
 
 def save_checkpoint(model, print_out=True):
@@ -37,9 +35,9 @@ def save_checkpoint(model, print_out=True):
         print('Saving checkpoint. Epoch:', model.epoch)
     filepath = get_filepath(model.name, True)
     state = {
-      'epoch': model.epoch,
-      'state_dict': model.feed_forward.state_dict(),
-      'optimizer': model.optimizer.state_dict()}
+        'epoch': model.epoch,
+        'state_dict': model.feed_forward.state_dict(),
+        'optimizer': model.optimizer.state_dict()}
     torch.save(state, filepath)
 
 
@@ -60,7 +58,7 @@ def load_checkpoint(model):
 
 
 def initialize_weights(modules, mean=0.0, variance=0.1, bias=0):
-    """ intialize network weights as Normal Distribution of given mean and variance """
+    """ initialize network weights as Normal Distribution"""
     for module in modules:
         if hasattr(module, "weight"):
             module.weight.data.normal_(mean, variance)
@@ -96,7 +94,9 @@ def discount_reward(rewards_list, discount_factor):
         i += 1
     return rewards_list
 
-#splits up black and whites training data
+# splits up black and whites training data
+
+
 def split_episode_data(states, rewards):
     i = 0
     white_states = []
@@ -112,12 +112,13 @@ def split_episode_data(states, rewards):
             black_rewards.append(rewards[i])
         i += 1
     out = {
-    'white_states': white_states,
-    'white_rewards': white_rewards,
-    'black_states': black_states,
-    'black_rewards': black_rewards
+        'white_states': white_states,
+        'white_rewards': white_rewards,
+        'black_states': black_states,
+        'black_rewards': black_rewards
     }
     return out
+
 
 def create_dataloader(states, rewards, batch_size=32):
     states = torch.Tensor(np.array(states).tolist())
@@ -126,13 +127,15 @@ def create_dataloader(states, rewards, batch_size=32):
     dataloader = data_utils.DataLoader(dataset, batch_size=batch_size)
     return dataloader
 
-#encapsulates split_episode_data, discount_reward, and create_dataloader    
+# encapsulates split_episode_data, discount_reward, and create_dataloader
+
+
 def process_raw_data(states, rewards, discount_factor, cat=True):
     split = split_episode_data(states, rewards)
     white_rewards = discount_reward(split['white_rewards'], discount_factor)
     black_rewards = discount_reward(split['black_rewards'], discount_factor)
     if cat:
-        states = split['white_states']+split['black_states']
+        states = split['white_states'] + split['black_states']
         rewards = white_rewards + black_rewards
         dataloader = create_dataloader(states, rewards)
         return dataloader
@@ -142,21 +145,23 @@ def process_raw_data(states, rewards, discount_factor, cat=True):
     }
     return split_data
 
+
 def training_session(model, dataset, n_epochs,
-    checkpoint_frequency=1, save_param_frequency=10, 
-    starting_index=0, print_batch=False, 
-    print_checkpoint=True, print_saves=True):
+                     checkpoint_frequency=1, save_param_frequency=10,
+                     starting_index=0, print_batch=False,
+                     print_checkpoint=True, print_saves=True):
     """function to manage the train session"""
     for epoch in range(0, n_epochs, 1):
-        model.train(dataset, 
-            starting_index=starting_index, 
-            print_batch=print_batch)
+        model.train(dataset,
+                    starting_index=starting_index,
+                    print_batch=print_batch)
         if(checkpoint_frequency is not None):
             if(model.epoch % checkpoint_frequency == 0):
                 save_checkpoint(model, print_out=print_checkpoint)
         if(save_param_frequency is not None):
             if(model.epoch % save_param_frequency == 0):
                 save_params(model, print_out=print_saves)
+
 
 def play_episode(model, half_turn_limit=2000, print_rewards=True):
     model.env._reset()
@@ -167,31 +172,32 @@ def play_episode(model, half_turn_limit=2000, print_rewards=True):
         a = model.perform_action()
         states.append(a['state'])
         rewards.append(a['reward'])
-        if(a['isTerminated'] == True or i > half_turn_limit):
+        if a['isTerminated'] or i > half_turn_limit:
             if print_rewards:
                 print(sum(rewards), len(rewards))
             return states, rewards
         i += 1
 
-#This plays multiple episodes and packs them all in 1 dataloader. Improves speed by ~8%
+# This plays multiple episodes and packs them all in 1 dataloader. Improves speed by ~8%
+
+
 def generate_data(model, num_games, discount_factor,
                   half_turn_limit=2000, print_rewards=True):
     i = 0
     states = []
     rewards = []
-    while(i<num_games):
-        raw_state, raw_reward =play_episode(model, 
-            half_turn_limit=half_turn_limit, print_rewards=print_rewards)
+    while(i < num_games):
+        raw_state, raw_reward = play_episode(model,
+                                             half_turn_limit=half_turn_limit, print_rewards=print_rewards)
         split = split_episode_data(raw_state, raw_reward)
-        white_rewards = discount_reward(split['white_rewards'], discount_factor)
-        black_rewards = discount_reward(split['black_rewards'], discount_factor)
+        white_rewards = discount_reward(
+            split['white_rewards'], discount_factor)
+        black_rewards = discount_reward(
+            split['black_rewards'], discount_factor)
         states += split['white_states']
         states += split['black_states']
         rewards += white_rewards
         rewards += black_rewards
-        i+=1
+        i += 1
     dataloader = create_dataloader(states, rewards)
     return dataloader
-
- 
-
