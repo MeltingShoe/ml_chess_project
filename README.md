@@ -9,9 +9,6 @@ For usage and installation instructions, see: https://pypi.python.org/pypi/pytho
 ### OpenAI Gym
 For installation instructions, see: https://www.youtube.com/watch?v=Io1wOuHEyW0&feature=youtu.be
 
-## gym-chess has moved!
-You can find it here: https://github.com/MeltingShoe/gym-chess
-
 Documentation
 ======
 The most important objective in writing these docs is explaining what everything does, why they were made, and how everything works together. As such I may be brief as to exactly how some parts of the program work, but I will be documenting everything in the project. If the usage of anything is unclear, let me know and I'll update the docs on it.
@@ -142,3 +139,121 @@ discount_factor: An int for how much importance should be given to future reward
 half_turn_limit=2000: The number of individual moves before this will terminate without waiting for the game to end
 print_rewards=True: If true this will print out the total of all rewards and the number of moves made
 ```
+
+# /classes/base_model.py
+This file contains generate_class, which is a "class factory" function that generates a class encapsulating all the functionality required for a model to work.
+The class uses typeclass style construction, but this isn't functionally any different from normal class construction. It just made writing this function easier.
+The name base_model is inaccurate, because this class is made as a container for all of the parameters of a single experiment such as the training function, learning rate, and much more.
+The class also contains an instance of the gym environment where games are played.
+
+## generate_class parameters
+The parameters of this function are expected to be a dict containing specific keys.
+
+Parameters:
+```
+'name': The name of the model/experiment to be used in the filename of checkpoints and parameter saves
+'ff': A class containing the feed forward method of the model defined in /models/feed_forward.py
+'tr': A function for training the model defined in /models/train.py. The first param of this function should be self
+'pa': A function that should feed the current board position through feed_forward and play a move. 
+'bt': A function that takes the board position and makes any necessary transformations, such as encoding the position as an 8x8x12 array or autoencoding the position
+'learning_rate': The learning rate to use
+'optimizer': The optimizer to use
+'loss_function': The loss function to use
+```
+
+## init(self, use_cuda=True, resume=True)
+The classes init which sets whether cuda is used and loads a checkpoint if one exists, or initialized weights if it doesn't.
+
+Parameters:
+```
+use_cuda=True: Whether cuda should be used.
+resume=True: If this is false new weights will be initialized no matter what. Be careful with this because the models old parameters will be overwritten.
+```
+
+## cuda(self)
+Sets self.use_cuda to True
+
+## check_params(params)
+Takes in the params dict and does some checks to make sure the right keys are given and types are correct.
+Needs to be updated to also check for board_transform
+
+# /models/board_transform.py
+This file is for funtions that modify the board representation, like splitting it into an 8x8x12 array or autoencoding the board state. 
+These functions should take self as a parameter and modify `self.env._get_array_state()[0]`
+
+## noTransform(self)
+This function does not modify the board representation. It's still necessary because wherever something trys to get the board state it calls `self.board()`
+
+# /models/feed_forward.py
+This file is for defining the feed forward computation of all models we build. These should be classes that subclass `nn.module` and have a method named `forward()` that takes a single
+parameter as the input for the network
+
+## ChessFC()
+This is a fully connected network that was build to test functionality of the program but for some reason is performing far better than expected.
+
+It's structure is:
+```
+64 input nodes
+FC 128 nodes
+FC 256 nodes
+Dropout p=0.5
+FC 512 nodes
+Dropout p=0.5
+FC 512 nodes
+Dropout p=0.5
+FC 256 nodes
+Dropout p=0.5
+FC 64 nodes
+FC 32 nodes
+1 output node
+```
+Relu is applied to all but the last layer. All decisions about the structure of this network were completely arbitrary. It was only built as a test and no thought was put into
+making a network that would perform well, this was only meant to test that our code works.
+
+# /models/model_defs.py
+This file is for defining every model we build. To build a new experiment write whatever code you need in board_transform.py, feed_forward.py, perform_action.py, and train.py. 
+Then in this file make a new dict defining all the params, and under it write `model_name = generate_class(params_dict)`
+For params documentation see the documentation for /classes/base_model.py
+
+# /models/perform_action.py
+This file is for functions that call feed_forward on the board state, select/play a move, and should output a dict containing the state, reward, isTerminated, and the chosen move.
+
+## PA_legal_move_values()
+This has the network evaluate the position after every possible legal move, softmaxes the outputs, and selects a move from the resulting probability distribution. This requires
+that the network only outputs a single value that represents the value of a given position.
+
+# /models/train.py
+This file is for training functions.
+
+## default_train(self, dataloader, starting_index=0, print_batch=False)
+A training function that should work for most networks we make.
+
+Parameters:
+```
+dataloader: a pytorch dataloader of the training data
+starting_index=0: the index to start training from, in case you want to halt training and start again later at that index
+print_batch=False: if true the epoch loss will be printed every batch
+```
+
+# /runtimes/test.py
+Our main runtime, named test because I made this file while debugging and planned on making a new runtime. 
+
+```
+net = model_defs.model: the experiment to be run defined in /models/model_defs.py
+n_epochs: The number of epochs to train on each set of generated data
+discount_factor: An int for how much importance should be given to future rewards
+```
+
+## pack_episode()
+This is a function called by async() that calls utils.play_episode(), utils.split_episode_data(), utils.discount_reward(), concatenates the output, and returns it.
+
+## async()
+This uses torch.multiprocessing to spawn 5 processes to play 5 games and return their data in a list. The number of games is currently not dynamic because I couldn't figure out how to do that.
+Right now multiprocessing is fairly buggy and can cause python to crash if it gets a keyboard interrupt. As such it should mainly be used for training networks because it's around
+twice as fast as utils.generate_data(), but utils.generate_data() can be used for debugging so you don't have to restart your interpreter every time you have to force the process to quit.
+
+## async_generate_data()
+This calls async, concatenates the resulting data, and packs it all into a dataloader.
+
+## Runtime loop
+The runtime loop is simply a for loop that calls either async_generate_data() or utils.generate_data() followed by utils.training_session()

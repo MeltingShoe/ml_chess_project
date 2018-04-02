@@ -40,9 +40,10 @@ def generate_class(params):
     '''
     # check if all the params are correct
     if not check_params(params):
+        print('check_params failed')
         return None
 
-    def init(self, use_cuda=True, resume=False):
+    def init(self, use_cuda=True, resume=True):
         ''''
         Most of these attributes should be moved to the attrs dict
         It would help readability and avoid some inheritence
@@ -65,10 +66,6 @@ def generate_class(params):
         else:
             self.epoch = 0
             utils.initialize_weights(self.feed_forward.modules())
-
-
-
-
 
     # not sure if this actually does anything
 
