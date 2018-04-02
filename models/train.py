@@ -8,7 +8,7 @@ def default_train(self, dataloader, starting_index=0, print_batch=False):
     epoch_loss = 0.0
     for i, data in enumerate(dataloader, starting_index):
         inputs, labels = data  # get inputs and labels 
-        if self.use_cuda:
+        if self.use_cuda and torch.cuda.is_available():
             inputs, labels = inputs.cuda(), labels.cuda()
 
         inputs = Variable(inputs)

@@ -7,6 +7,17 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as data_utils
 
+use_cuda = torch.cuda.is_available()
+FloatTensor = torch.cuda.FloatTensor if use_cuda else torch.FloatTensor
+LongTensor = torch.cuda.LongTensor if use_cuda else torch.LongTensor
+ByteTensor = torch.cuda.ByteTensor if use_cuda else torch.ByteTensor
+
+SAVE_DIR = "Saves"
+
+def ensure_dir(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
 def save_params(model, print_out=True):
     """save model to file """
     if print_out:
@@ -63,7 +74,7 @@ def get_filepath(model_name, checkpoint=False):
     else:
         filename = '{}.pth.tar'.format(model_name)
 
-    filepath = os.path.join('Saves', filename)
+    filepath = os.path.join(SAVE_DIR, filename)
     return filepath
 
 
