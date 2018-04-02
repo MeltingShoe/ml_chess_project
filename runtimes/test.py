@@ -19,8 +19,6 @@ from models import model_defs
 net = model_defs.fc_test
 n_epochs = 20
 discount_factor = 0.5
-run = net(True, resume=True)
-run.cuda()
 
 
 def pack_episode():
@@ -74,6 +72,7 @@ if __name__ == '__main__':
 
     num_wins = 0
     num_games = 0
+    run = net(resume=True)
     for i in range(3):
         data, metrics = async_generate_data()
         #data, metrics = utils.generate_data(run, 5, discount_factor)
