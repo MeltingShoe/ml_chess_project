@@ -2,6 +2,7 @@ import torch
 import os
 import numpy as np
 import torch.utils.data as data_utils
+import time
 
 use_cuda = torch.cuda.is_available()
 FloatTensor = torch.cuda.FloatTensor if use_cuda else torch.FloatTensor
@@ -163,12 +164,15 @@ def training_session(model, dataloader, n_epochs,
                 save_params(model, print_out=print_saves)
 
 
-def play_episode(model, half_turn_limit=2000, print_rewards=True):
+def play_episode(model, half_turn_limit=2000, print_rewards=True, render=False, render_delay=1):
     model.env._reset()
     states = []
     rewards = []
     i = 0
     while True:
+        if render:
+            model.env._render()
+            time.sleep(render_delay)
         a = model.perform_action()
         states.append(a['state'])
         rewards.append(a['reward'])

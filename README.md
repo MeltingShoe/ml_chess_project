@@ -119,7 +119,7 @@ print_checkpoint=True: Whether to printout checkpoint saves
 print_saves=True: Whether to printout param saves
 ```
 
-## play_episode(model, half_turn_limit=2000, print_rewards=True)
+## play_episode(model, half_turn_limit=2000, print_rewards=True, render=False, render_delay=1)
 Plays a single game of chess with the model against itself and outputs raw training data
 
 Parameters:
@@ -127,6 +127,8 @@ Parameters:
 model: The base container class of the model to be saved
 half_turn_limit=2000: The number of individual moves before this will terminate without waiting for the game to end
 print_rewards=True: If true this will print out the total of all rewards and the number of moves made
+render=False: If true the env will be rendered after every move
+render_delay=1: Delay in seconds between moves when rendering the board
 ```
 
 ## generate_data(model, num_games, discount_factor)

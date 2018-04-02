@@ -79,3 +79,4 @@ if __name__ == '__main__':
                                starting_index=0,
                                print_checkpoint=True,
                                print_saves=True)
+    utils.play_episode(run, render=True)
