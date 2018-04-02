@@ -164,6 +164,13 @@ def training_session(model, dataloader, n_epochs,
                 save_params(model, print_out=print_saves)
 
 
+def won(rewards):
+    if(sum(rewards) > 100):
+        return 1
+    else:
+        return 0
+
+
 def play_episode(model, half_turn_limit=2000, print_rewards=True, render=False, render_delay=1):
     model.env._reset()
     states = []
@@ -177,9 +184,10 @@ def play_episode(model, half_turn_limit=2000, print_rewards=True, render=False, 
         states.append(a['state'])
         rewards.append(a['reward'])
         if a['isTerminated'] or i > half_turn_limit:
+            metrics = {'wins': won(rewards)}
             if print_rewards:
                 print(sum(rewards), len(rewards))
-            return states, rewards
+            return states, rewards, metrics
         i += 1
 
 # This plays multiple episodes and packs them all in 1 dataloader. Improves speed by ~8%
@@ -190,8 +198,9 @@ def generate_data(model, num_games, discount_factor,
     i = 0
     states = []
     rewards = []
+    metrics = {'wins':0}
     while(i < num_games):
-        raw_state, raw_reward = play_episode(model,
+        raw_state, raw_reward, raw_metrics = play_episode(model,
                                              half_turn_limit=half_turn_limit, print_rewards=print_rewards)
         split = split_episode_data(raw_state, raw_reward)
         white_rewards = discount_reward(
@@ -202,6 +211,7 @@ def generate_data(model, num_games, discount_factor,
         states += split['black_states']
         rewards += white_rewards
         rewards += black_rewards
+        metrics['wins'] += raw_metrics['wins']
         i += 1
     dataloader = create_dataloader(states, rewards)
-    return dataloader
+    return dataloader, metrics
