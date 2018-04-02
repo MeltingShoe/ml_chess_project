@@ -15,15 +15,17 @@ from torch.multiprocessing import Pool
 from classes import utils
 from models import model_defs
 
+
 net = model_defs.fc_test
 n_epochs = 20
 discount_factor = 0.5
-run = net(resume=True)
+run = net(True, resume=True)
 run.cuda()
 
 
 def pack_episode():
-    a, b = utils.play_episode(net(resume=True))
+
+    a, b = utils.play_episode(net(resume=True, parent_process=False))
     split = utils.split_episode_data(a, b)
     white_rewards = utils.discount_reward(
         split['white_rewards'], discount_factor)
@@ -41,12 +43,6 @@ if __name__ == '__main__':
 
     def async(threads):
         stack = []
-        '''
-        I have no idea what am doing and no matter what I tried I couldn't find a way to make the 
-        number of total episodes dynamic. Multiprocessing is weird and difficult to work with.
-        Also this has a tendency to completely crash python if you do a keyboard interrupt sooooo...
-        It's interesting to note that it calls load_checkpoint twice for each process too
-        '''
         with Pool(processes=threads) as pool:
             res = pool.apply_async(pack_episode)
             res1 = pool.apply_async(pack_episode)
@@ -74,7 +70,7 @@ if __name__ == '__main__':
         dataloader = utils.create_dataloader(states_stack, rewards_stack)
         return dataloader
 
-    for i in range(100000):
+    for i in range(1):
         data = async_generate_data()
         #data = utils.generate_data(run, 5, discount_factor)
         utils.training_session(run, data, n_epochs,

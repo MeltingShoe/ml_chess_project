@@ -41,16 +41,18 @@ def save_checkpoint(model, print_out=True):
     torch.save(state, filepath)
 
 
-def load_checkpoint(model):
+def load_checkpoint(model, print_out=True):
     filepath = get_filepath(model.name, True)
     if os.path.isfile(filepath):
-        print("=> loading checkpoint '{}'".format(filepath))
+        if print_out:
+            print("=> loading checkpoint '{}'".format(filepath))
         checkpoint = torch.load(filepath)
         model.epoch = checkpoint['epoch']
         model.feed_forward.load_state_dict(checkpoint['state_dict'])
         model.optimizer.load_state_dict(checkpoint['optimizer'])
-        print("=> loaded checkpoint '{}' (epoch {})"
-              .format(filepath, checkpoint['epoch']))
+        if print_out:
+            print("=> loaded checkpoint '{}' (epoch {})"
+                  .format(filepath, checkpoint['epoch']))
         return True
     else:
         print("=> no checkpoint found at '{}'".format(filepath))
