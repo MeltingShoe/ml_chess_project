@@ -26,8 +26,8 @@ pa: Currently the supervised evaluate function, we'll need
 def generate_class(params):
     '''
     Setting BaseModel doesn't actually do anything atm because we
-    explicitely define the abstract methods in here
-    I don't think it really matters though because explicitely defining the
+    explicitly define the abstract methods in here
+    I don't think it really matters though because explicitly defining the
     methods should prevent any inheritance issues
     Update: no longer uses ABC because it caused problems
     '''
@@ -42,9 +42,7 @@ def generate_class(params):
     if not check_params(params):
         return None
 
-    def init(self,
-             use_cuda=True,
-             resume=False):
+    def init(self, use_cuda=True, resume=False):
         ''''
         Most of these attributes should be moved to the attrs dict
         It would help readability and avoid some inheritence

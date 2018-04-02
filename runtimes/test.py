@@ -1,9 +1,17 @@
-from models import model_defs
-from classes import utils
-import numpy as np
-import time
-import torch.multiprocessing as mp
+import sys
+# add itself for relative imports (TODO: this should be `pip install`(ed) but the project itself may need a few `__init__` definitions to make it into a python module)
+do_modify = True
+proj_path = '../ml_chess_project'   # <-- change this if your top level directory is not named ml_chess_project
+for path in sys.path:
+    if proj_path == path:
+        do_modify = False
+        break
+if do_modify: sys.path.insert(0, proj_path)
+
 from torch.multiprocessing import Pool
+
+from classes import utils
+from models import model_defs
 
 net = model_defs.fc_test
 n_epochs = 20
