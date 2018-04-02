@@ -22,11 +22,10 @@ def PA_legal_move_values(self):
 
     outputs = self.feed_forward(
         Variable(utils.FloatTensor(np.concatenate(boards))))
-
-    outputs = F.softmax(outputs, dim=0).data.numpy().ravel()
+    outputs = F.softmax(outputs, dim=0).data.cpu().numpy().ravel()
 
     s = sum(outputs)
-
+    # does this do anything?
     outputs / np.sum(outputs)
 
     move = np.random.choice(
@@ -37,7 +36,7 @@ def PA_legal_move_values(self):
 
     outputs = self.feed_forward(
         Variable(utils.FloatTensor(np.concatenate(boards))))
-    outputs = F.softmax(outputs, dim=0).data.numpy().ravel()
+    outputs = F.softmax(outputs, dim=0).data.cpu().numpy().ravel()
     outputs = outputs / np.sum(outputs)
 
     move_index = np.random.choice(len(outputs), size=1, p=outputs)[0]
