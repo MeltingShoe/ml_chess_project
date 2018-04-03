@@ -10,6 +10,7 @@ for path in sys.path:
 if do_modify:
     sys.path.insert(0, proj_path)
 
+import os
 from torch.multiprocessing import Pool
 
 from classes import utils
@@ -39,28 +40,21 @@ if __name__ == '__main__':
 
     utils.ensure_dir(utils.SAVE_DIR)
 
-    def async(threads):
+    def async(n_threads):
         stack = []
-        with Pool(processes=threads) as pool:
-            res = pool.apply_async(pack_episode)
-            res1 = pool.apply_async(pack_episode)
-            res2 = pool.apply_async(pack_episode)
-            res3 = pool.apply_async(pack_episode)
-            res4 = pool.apply_async(pack_episode)
-            stack.append(res.get())
-            stack.append(res1.get())
-            stack.append(res2.get())
-            stack.append(res3.get())
-            stack.append(res4.get())
-        return stack
+        with Pool(processes=n_threads) as pool:
+            results = [pool.apply_async(pack_episode) for _ in range(n_threads)]
+            for res in results:
+                stack.append(res.get())
+            return stack
 
-    def async_generate_data():
-        data = async(5)
+    def async_generate_data(n_threads = os.cpu_count() if os.cpu_count() else 4):
+        data = async(n_threads)
         rewards_stack = []
         states_stack = []
         c = 0
         metrics = {'wins': 0}
-        for _ in range(5):
+        for _ in range(n_threads):
             c += 1
             a = data.pop()
             rewards_stack += a['rewards']
