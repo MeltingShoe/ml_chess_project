@@ -11,6 +11,8 @@ if do_modify:
     sys.path.insert(0, proj_path)
 
 import os
+import platform
+import torch.multiprocessing as mp
 from torch.multiprocessing import Pool
 
 from classes import utils
@@ -26,10 +28,8 @@ def pack_episode():
 
     a, b, metrics = utils.play_episode(net(resume=True, parent_process=False))
     split = utils.split_episode_data(a, b)
-    white_rewards = utils.discount_reward(
-        split['white_rewards'], discount_factor)
-    black_rewards = utils.discount_reward(
-        split['black_rewards'], discount_factor)
+    white_rewards = utils.discount_reward(split['white_rewards'], discount_factor)
+    black_rewards = utils.discount_reward(split['black_rewards'], discount_factor)
     states = split['white_states'] + split['black_states']
     rewards = white_rewards + black_rewards
     out = {'states': states, 'rewards': rewards, 'metrics': metrics}
@@ -37,6 +37,9 @@ def pack_episode():
 
 
 if __name__ == '__main__':
+
+    if platform.system() == 'Linux':
+        mp.set_start_method('spawn')
 
     utils.ensure_dir(utils.SAVE_DIR)
 
