@@ -16,6 +16,7 @@ def default_train(self, dataloader, starting_index=0, print_batch=False):
 
         self.optimizer.zero_grad()  # zero parameters gradient
 
+        print(list(inputs.size()))
         outputs = self.feed_forward(inputs)  # forward
         loss = self.loss_function(outputs, labels)  # compute loss
         loss.backward()  # backpropagation

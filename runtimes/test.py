@@ -19,7 +19,7 @@ from classes import utils
 from models import model_defs
 
 
-net = model_defs.fc_test
+net = model_defs.fc_norm
 n_epochs = 20
 discount_factor = 0.5
 
@@ -74,7 +74,7 @@ if __name__ == '__main__':
         data, metrics = async_generate_data()
         #data, metrics = utils.generate_data(run, 5, discount_factor)
         num_wins += metrics['wins']
-        num_games += 5
+        num_games += os.cpu_count() if os.cpu_count() else 4
         print('Percent of games not drawn:', num_wins / num_games)
         utils.training_session(run, data, n_epochs,
                                checkpoint_frequency=1,

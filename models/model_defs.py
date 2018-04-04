@@ -19,3 +19,16 @@ fc_test_params = {
     'loss_function': nn.L1Loss
 }
 fc_test = generate_class(fc_test_params)
+
+#fc_norm
+fc_norm_params = {
+    'name': 'fc_norm',
+    'ff': ff.ChessFCNorm(),
+    'tr': tr.default_train,
+    'pa': pa.PA_legal_move_values,
+    'bt': bt.noTransform,
+    'learning_rate': 0.001,
+    'optimizer': optim.Adam,
+    'loss_function': nn.L1Loss
+}
+fc_norm = generate_class(fc_norm_params)

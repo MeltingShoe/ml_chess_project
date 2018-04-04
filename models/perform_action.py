@@ -1,6 +1,7 @@
 import torch
 from torch.autograd import Variable
 import operator
+import os
 import numpy as np
 import random
 import torch.nn.functional as F
@@ -20,11 +21,11 @@ def PA_legal_move_values(self):
         boards.append(board)
         self.env.alt_reset()
 
-    outputs = self.feed_forward(
-        Variable(utils.FloatTensor(np.concatenate(boards))))
+    inputs = Variable(utils.FloatTensor(np.stack(boards, axis=0)))
+    print(list(inputs.size()))
+    outputs = self.feed_forward(inputs)
     outputs = F.softmax(outputs, dim=0).data.cpu().numpy().ravel()
 
-    s = sum(outputs)
     # does this do anything?
     outputs / np.sum(outputs)
 
@@ -34,8 +35,9 @@ def PA_legal_move_values(self):
         p=outputs,
     )
 
-    outputs = self.feed_forward(
-        Variable(utils.FloatTensor(np.concatenate(boards))))
+    inputs = Variable(utils.FloatTensor(np.stack(boards, axis=0)))
+    print(list(inputs.size()))
+    outputs = self.feed_forward(inputs)
     outputs = F.softmax(outputs, dim=0).data.cpu().numpy().ravel()
     outputs = outputs / np.sum(outputs)
 
