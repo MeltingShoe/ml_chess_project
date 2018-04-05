@@ -149,6 +149,15 @@ half_turn_limit=2000: The number of individual moves before this will terminate 
 print_rewards=True: If true this will print out the total of all rewards and the number of moves made
 ```
 
+## export_pgn(model, path)
+Saves the game in standard notation to a .pgn file, which can be replayed in PGN viewers like this one: https://chesstempo.com/pgn-viewer.html
+
+Parameters:
+```
+model: The base container class of the model from which the game is exported
+path: Path of file to write, should be a .pgn or .txt
+```
+
 # /classes/base_model.py
 This file contains generate_class, which is a "class factory" function that generates a class encapsulating all the functionality required for a model to work.
 The class uses typeclass style construction, but this isn't functionally any different from normal class construction. It just made writing this function easier.
