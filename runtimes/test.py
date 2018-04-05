@@ -19,7 +19,7 @@ from classes import utils
 from models import model_defs
 
 
-net = model_defs.b0_test
+net = model_defs.fc_test
 n_epochs = 20
 discount_factor = 0.5
 
@@ -73,7 +73,6 @@ if __name__ == '__main__':
     run = net(resume=True)
     run.board()
 
-'''
     num_wins = 0
     num_games = 0
     num_moves = 0
@@ -97,4 +96,4 @@ if __name__ == '__main__':
                                save_param_frequency=10,
                                starting_index=0,
                                print_checkpoint=False,
-                               print_saves=True)'''
+                               print_saves=True)
