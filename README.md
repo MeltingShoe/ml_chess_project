@@ -123,7 +123,7 @@ print_saves=True: Whether to printout param saves
 Outputs 1 if sum(rewards)>100, 0 otherwise
 
 ## play_episode(model, half_turn_limit=2000, print_rewards=True, render=False, render_delay=1)
-Plays a single game of chess with the model against itself and outputs raw training data and a dictionary containing metrics, currently just whether the game was won.
+Plays a single game of chess with the model against itself and outputs raw training data and a dictionary containing metrics, currently just whether the game was won and the number of moves.
 
 Parameters:
 ```
@@ -190,6 +190,16 @@ These functions should take self as a parameter and modify `self.env._get_array_
 
 ## noTransform(self)
 This function does not modify the board representation. It's still necessary because wherever something trys to get the board state it calls `self.board()`
+
+## split_by_piece(self)
+Splits board to 6x8x8 array with white pieces being positive and black being negative.
+The index of each slice of the array = the value of that piece assigned by the env - 1
+
+## split_by_piece_and_side(self)
+Splits board to 12x8x8 n-hot array. The index of each slice is the same as above, but with blacks pieces concatenated after whites.
+
+## split_by_piece_and_side_with_empty(self)
+Splits board to 13x8x8 n-hot array. Same as above, but with board[0] = empty squares.
 
 # /models/feed_forward.py
 This file is for defining the feed forward computation of all models we build. These should be classes that subclass `nn.module` and have a method named `forward()` that takes a single

@@ -19,3 +19,15 @@ fc_test_params = {
     'loss_function': nn.L1Loss
 }
 fc_test = generate_class(fc_test_params)
+
+fc_12_slice_params = {
+    'name': 'fc_12_slice',
+    'ff': ff.FC12Slice(),
+    'tr': tr.default_train,
+    'pa': pa.PA_legal_move_values,
+    'bt': bt.split_by_piece_and_side,
+    'learning_rate': 0.001,
+    'optimizer': optim.Adam,
+    'loss_function': nn.L1Loss
+}
+fc_12_slice = generate_class(fc_12_slice_params)
