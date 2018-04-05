@@ -19,7 +19,7 @@ from classes import utils
 from models import model_defs
 
 
-net = model_defs.fc_test
+net = model_defs.b0_test
 n_epochs = 20
 discount_factor = 0.5
 
@@ -28,8 +28,10 @@ def pack_episode():
 
     a, b, metrics = utils.play_episode(net(resume=True, parent_process=False))
     split = utils.split_episode_data(a, b)
-    white_rewards = utils.discount_reward(split['white_rewards'], discount_factor)
-    black_rewards = utils.discount_reward(split['black_rewards'], discount_factor)
+    white_rewards = utils.discount_reward(
+        split['white_rewards'], discount_factor)
+    black_rewards = utils.discount_reward(
+        split['black_rewards'], discount_factor)
     states = split['white_states'] + split['black_states']
     rewards = white_rewards + black_rewards
     out = {'states': states, 'rewards': rewards, 'metrics': metrics}
@@ -68,11 +70,16 @@ if __name__ == '__main__':
 
         dataloader = utils.create_dataloader(states_stack, rewards_stack)
         return dataloader, metrics
+    run = net(resume=True)
+    run.board()
 
+'''
     num_wins = 0
     num_games = 0
     num_moves = 0
     run = net(resume=True)
+    utils.play_episode(run, half_turn_limit=2000,
+                       print_rewards=True, render=True, render_delay=1)
     for i in range(100000):
         data, metrics = async_generate_data(n_threads=7)
         #data, metrics = utils.generate_data(run, 5, discount_factor)
@@ -90,4 +97,4 @@ if __name__ == '__main__':
                                save_param_frequency=10,
                                starting_index=0,
                                print_checkpoint=False,
-                               print_saves=True)
+                               print_saves=True)'''
