@@ -20,6 +20,7 @@ from models import model_defs
 
 
 net = model_defs.fc_12_slice
+net = model_defs.simple_cnn
 n_epochs = 20
 discount_factor = 0.5
 

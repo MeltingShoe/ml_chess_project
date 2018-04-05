@@ -6,6 +6,7 @@ import random
 import torch.nn.functional as F
 import time
 from classes import utils
+from torch.distributions import Categorical
 
 
 def PA_legal_move_values(self):
@@ -22,24 +23,12 @@ def PA_legal_move_values(self):
 
     outputs = self.feed_forward(
         Variable(utils.FloatTensor(np.concatenate(boards))))
-    outputs = F.softmax(outputs, dim=0).data.cpu().numpy().ravel()
+    outputs = F.softmax(outputs, dim=0)
 
-    s = sum(outputs)
-    # does this do anything?
-    outputs / np.sum(outputs)
+    outputs = outputs.view(-1)
+    categorical = Categorical(outputs)
+    move_index = categorical.sample().data.numpy()[0]
 
-    move = np.random.choice(
-        len(outputs),
-        size=1,
-        p=outputs,
-    )
-
-    outputs = self.feed_forward(
-        Variable(utils.FloatTensor(np.concatenate(boards))))
-    outputs = F.softmax(outputs, dim=0).data.cpu().numpy().ravel()
-    outputs = outputs / np.sum(outputs)
-
-    move_index = np.random.choice(len(outputs), size=1, p=outputs)[0]
     move = legal_moves[move_index]
 
     envOut = self.env._step(move)
