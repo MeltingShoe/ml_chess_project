@@ -26,7 +26,8 @@ discount_factor = 0.5
 
 def pack_episode():
 
-    a, b, metrics = utils.play_episode(net(resume=True, parent_process=False))
+    model = net(resume=True, parent_process=False)
+    a, b, metrics = utils.play_episode(model)
     split = utils.split_episode_data(a, b)
     white_rewards = utils.discount_reward(
         split['white_rewards'], discount_factor)

@@ -122,8 +122,10 @@ print_saves=True: Whether to printout param saves
 ## won(rewards)
 Outputs 1 if sum(rewards)>100, 0 otherwise
 
-## play_episode(model, half_turn_limit=2000, print_rewards=True, render=False, render_delay=1)
+
+## play_episode(model, half_turn_limit=2000, print_rewards=True, render=False, render_delay=1, save_pgn=False)
 Plays a single game of chess with the model against itself and outputs raw training data and a dictionary containing metrics, currently just whether the game was won and the number of moves.
+
 
 Parameters:
 ```
@@ -132,6 +134,7 @@ half_turn_limit=2000: The number of individual moves before this will terminate 
 print_rewards=True: If true this will print out the total of all rewards and the number of moves made
 render=False: If true the env will be rendered after every move
 render_delay=1: Delay in seconds between moves when rendering the board
+save_pgn=False: If True a pgn file of the game will be exported
 ```
 
 ## generate_data(model, num_games, discount_factor)

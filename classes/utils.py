@@ -3,6 +3,8 @@ import os
 import numpy as np
 import torch.utils.data as data_utils
 import time
+import chess
+import chess.pgn
 
 use_cuda = torch.cuda.is_available()
 FloatTensor = torch.cuda.FloatTensor if use_cuda else torch.FloatTensor
@@ -171,7 +173,7 @@ def won(rewards):
         return 0
 
 
-def play_episode(model, half_turn_limit=2000, print_rewards=True, render=False, render_delay=1):
+def play_episode(model, half_turn_limit=2000, print_rewards=True, render=False, render_delay=1, save_pgn=False):
     model.env._reset()
     states = []
     rewards = []
@@ -187,6 +189,8 @@ def play_episode(model, half_turn_limit=2000, print_rewards=True, render=False, 
             metrics = {'wins': won(rewards), 'moves': len(rewards)}
             if print_rewards:
                 print(sum(rewards), len(rewards))
+            if save_pgn:
+                export_pgn(model, 'Saves/last_game_played.pgn')
             return states, rewards, metrics
         i += 1
 
@@ -215,3 +219,16 @@ def generate_data(model, num_games, discount_factor,
         i += 1
     dataloader = create_dataloader(states, rewards)
     return dataloader, metrics
+
+
+def generate_pgn(model):
+    pgn = chess.pgn.Game()
+    node = pgn
+    for move in model.env.env.move_stack:
+        node = node.add_variation(move)
+    return pgn
+
+
+def export_pgn(model, path):
+    pgn = generate_pgn(model)
+    print(pgn, file=open(path, "w"), end="\n\n")
