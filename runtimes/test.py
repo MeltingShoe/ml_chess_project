@@ -19,7 +19,7 @@ from classes import utils
 from models import model_defs
 
 
-net = model_defs.fc_test
+net = model_defs.fc_12_slice
 n_epochs = 20
 discount_factor = 0.5
 
@@ -77,8 +77,6 @@ if __name__ == '__main__':
     num_games = 0
     num_moves = 0
     run = net(resume=True)
-    utils.play_episode(run, half_turn_limit=2000,
-                       print_rewards=True, render=True, render_delay=1)
     for i in range(100000):
         data, metrics = async_generate_data(n_threads=7)
         #data, metrics = utils.generate_data(run, 5, discount_factor)
