@@ -34,7 +34,6 @@ def pack_episode():
     states = split['white_states'] + split['black_states']
     rewards = white_rewards + black_rewards
     out = {'states': states, 'rewards': rewards, 'metrics': metrics}
-    # utils.export_pgn(model, 'Saves/last_game_played.pgn')
     return out
 
 

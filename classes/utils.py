@@ -173,7 +173,7 @@ def won(rewards):
         return 0
 
 
-def play_episode(model, half_turn_limit=2000, print_rewards=True, render=False, render_delay=1):
+def play_episode(model, half_turn_limit=2000, print_rewards=True, render=False, render_delay=1, save_pgn=False):
     model.env._reset()
     states = []
     rewards = []
@@ -189,6 +189,8 @@ def play_episode(model, half_turn_limit=2000, print_rewards=True, render=False, 
             metrics = {'wins': won(rewards)}
             if print_rewards:
                 print(sum(rewards), len(rewards))
+            if save_pgn:
+                export_pgn(model, 'Saves/last_game_played.pgn')
             return states, rewards, metrics
         i += 1
 
@@ -200,10 +202,10 @@ def generate_data(model, num_games, discount_factor,
     i = 0
     states = []
     rewards = []
-    metrics = {'wins':0}
+    metrics = {'wins': 0}
     while(i < num_games):
         raw_state, raw_reward, raw_metrics = play_episode(model,
-                                             half_turn_limit=half_turn_limit, print_rewards=print_rewards)
+                                                          half_turn_limit=half_turn_limit, print_rewards=print_rewards)
         split = split_episode_data(raw_state, raw_reward)
         white_rewards = discount_reward(
             split['white_rewards'], discount_factor)
