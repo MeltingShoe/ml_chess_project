@@ -123,7 +123,7 @@ print_saves=True: Whether to printout param saves
 Outputs 1 if sum(rewards)>100, 0 otherwise
 
 ## play_episode(model, half_turn_limit=2000, print_rewards=True, render=False, render_delay=1)
-Plays a single game of chess with the model against itself and outputs raw training data and a dictionary containing metrics, currently just whether the game was won.
+Plays a single game of chess with the model against itself and outputs raw training data and a dictionary containing metrics, currently just whether the game was won and the number of moves.
 
 Parameters:
 ```
