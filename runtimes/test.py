@@ -26,13 +26,15 @@ discount_factor = 0.5
 
 def pack_episode():
 
-    a, b, metrics = utils.play_episode(net(resume=True, parent_process=False))
+    model = net(resume=True, parent_process=False)
+    a, b, metrics = utils.play_episode(model)
     split = utils.split_episode_data(a, b)
     white_rewards = utils.discount_reward(split['white_rewards'], discount_factor)
     black_rewards = utils.discount_reward(split['black_rewards'], discount_factor)
     states = split['white_states'] + split['black_states']
     rewards = white_rewards + black_rewards
     out = {'states': states, 'rewards': rewards, 'metrics': metrics}
+    # utils.export_pgn(model, 'Saves/last_game_played.pgn')
     return out
 
 

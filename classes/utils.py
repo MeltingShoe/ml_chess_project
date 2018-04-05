@@ -3,6 +3,8 @@ import os
 import numpy as np
 import torch.utils.data as data_utils
 import time
+import chess
+import chess.pgn
 
 use_cuda = torch.cuda.is_available()
 FloatTensor = torch.cuda.FloatTensor if use_cuda else torch.FloatTensor
@@ -215,3 +217,16 @@ def generate_data(model, num_games, discount_factor,
         i += 1
     dataloader = create_dataloader(states, rewards)
     return dataloader, metrics
+
+
+def generate_pgn(model):
+    pgn = chess.pgn.Game()
+    node = pgn
+    for move in model.env.env.move_stack:
+        node = node.add_variation(move)
+    return pgn
+
+
+def export_pgn(model, path):
+    pgn = generate_pgn(model)
+    print(pgn, file=open(path, "w"), end="\n\n")
