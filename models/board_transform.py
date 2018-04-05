@@ -18,7 +18,7 @@ def noTransform(self):
 def split_by_piece(self):
     '''
     not very elegant, but splits pieces into a 6x8x8 array
-    white pieces are +1, black -1
+    white pieces are positive, black negative
     each slice corresponds to the env piece value -1
     '''
     board = self.env._get_array_state()

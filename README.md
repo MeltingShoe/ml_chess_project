@@ -192,7 +192,7 @@ These functions should take self as a parameter and modify `self.env._get_array_
 This function does not modify the board representation. It's still necessary because wherever something trys to get the board state it calls `self.board()`
 
 ## split_by_piece(self)
-Splits board to 6x8x8 array with white pieces being +1 and black being -1
+Splits board to 6x8x8 array with white pieces being positive and black being negative.
 The index of each slice of the array = the value of that piece assigned by the env - 1
 
 ## split_by_piece_and_side(self)
