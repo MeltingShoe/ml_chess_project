@@ -186,7 +186,7 @@ def play_episode(model, half_turn_limit=2000, print_rewards=True, render=False, 
         states.append(a['state'])
         rewards.append(a['reward'])
         if a['isTerminated'] or i > half_turn_limit:
-            metrics = {'wins': won(rewards)}
+            metrics = {'wins': won(rewards), 'moves': len(rewards)}
             if print_rewards:
                 print(sum(rewards), len(rewards))
             if save_pgn:
