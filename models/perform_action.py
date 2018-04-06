@@ -27,7 +27,7 @@ def PA_legal_move_values(self):
 
     outputs = outputs.view(-1)
     categorical = Categorical(outputs)
-    move_index = categorical.sample().data.numpy()[0]
+    move_index = categorical.sample().data.cpu().numpy()[0]
 
     move = legal_moves[move_index]
 
