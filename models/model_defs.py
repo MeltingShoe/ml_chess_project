@@ -1,5 +1,6 @@
 from classes.base_model import generate_class
 import models.feed_forward as ff
+import models.cnn as cnn
 import models.train as tr
 import models.perform_action as pa
 import models.board_transform as bt
@@ -30,4 +31,18 @@ fc_12_slice_params = {
     'optimizer': optim.Adam,
     'loss_function': nn.L1Loss
 }
+
 fc_12_slice = generate_class(fc_12_slice_params)
+
+simple_cnn_params = {
+    'name': 'cnn',
+    'ff': cnn.SimpleCNN(),
+    'tr': tr.default_train,
+    'pa': pa.PA_legal_move_values,
+    'bt': bt.split_by_piece_and_side,
+    'learning_rate': 0.001,
+    'optimizer': optim.Adam,
+    'loss_function': nn.L1Loss
+}
+
+simple_cnn = generate_class(simple_cnn_params)
