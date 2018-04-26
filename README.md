@@ -137,6 +137,19 @@ render_delay=1: Delay in seconds between moves when rendering the board
 save_pgn=False: If True a pgn file of the game will be exported
 ```
 
+
+## play_episode_2_agents(model1, model2, half_turn_limit=2000, print_rewards=True, save_pgn=False)
+Similar to play_episode, but takes 2 models to play them against each other. Doesn't support rendering because it seemed like a pain. Be careful not to use this for self play, it breaks things.
+
+
+Parameters:
+```
+model1/model2: The base container classes of the models to play.
+half_turn_limit=2000: The number of individual moves before this will terminate without waiting for the game to end
+print_rewards=True: If true this will print out the total of all rewards and the number of moves made
+save_pgn=False: If True a pgn file of the game will be exported
+```
+
 ## generate_data(model, num_games, discount_factor)
 Plays multiple games with the model against itself, processes all the data, and packages it into a single dataloader.
 

@@ -194,6 +194,35 @@ def play_episode(model, half_turn_limit=2000, print_rewards=True, render=False, 
             return states, rewards, metrics
         i += 1
 
+
+def play_episode_2_agents(model1, model2, half_turn_limit=2000, print_rewards=True, save_pgn=False):
+    model1.env._reset()
+    model2.env._reset()
+    states = []
+    rewards = []
+    i = 0
+    while True:
+        if(i % 2 == 0):
+            a = model1.perform_action()
+        else:
+            a = model2.perform_action()
+        states.append(a['state'])
+        rewards.append(a['reward'])
+        move = a['move']
+        if a['isTerminated'] or i > half_turn_limit:
+            metrics = {'wins': won(rewards), 'moves': len(rewards)}
+            if print_rewards:
+                print(sum(rewards), len(rewards))
+            if save_pgn:
+                export_pgn(model1, 'Saves/last_game_played.pgn')
+            return states, rewards, metrics
+        if(i % 2 != 0):
+            model1.env._step(move)
+        else:
+            model2.env._step(move)
+        i += 1
+
+
 # This plays multiple episodes and packs them all in 1 dataloader. Improves speed by ~8%
 
 
