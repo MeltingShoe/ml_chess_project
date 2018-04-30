@@ -17,7 +17,12 @@ fc_test_params = {
     'bt': bt.noTransform,
     'learning_rate': 0.001,
     'optimizer': optim.Adam,
-    'loss_function': nn.L1Loss
+    'loss_function': nn.L1Loss,
+    'discount_factor': 0.5,
+    'n_epochs': 40,
+    'half_turn_limit': 200,
+    'episodes_before_update': 5,
+    'batch_size': 32
 }
 fc_test = generate_class(fc_test_params)
 
@@ -29,7 +34,12 @@ fc_12_slice_params = {
     'bt': bt.split_by_piece_and_side,
     'learning_rate': 0.001,
     'optimizer': optim.Adam,
-    'loss_function': nn.L1Loss
+    'loss_function': nn.L1Loss,
+    'discount_factor': 0.5,
+    'n_epochs': 40,
+    'half_turn_limit': 200,
+    'episodes_before_update': 5,
+    'batch_size': 32
 }
 
 fc_12_slice = generate_class(fc_12_slice_params)
@@ -42,7 +52,12 @@ simple_cnn_params = {
     'bt': bt.split_by_piece_and_side,
     'learning_rate': 0.001,
     'optimizer': optim.Adam,
-    'loss_function': nn.L1Loss
+    'loss_function': nn.L1Loss,
+    'discount_factor': 0.5,
+    'n_epochs': 40,
+    'half_turn_limit': 200,
+    'episodes_before_update': 5,
+    'batch_size': 32
 }
 
 simple_cnn = generate_class(simple_cnn_params)

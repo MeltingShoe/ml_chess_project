@@ -78,7 +78,12 @@ def generate_class(params):
              'optimizer': params['optimizer'](params['ff'].parameters(), lr=params['learning_rate']),
              'loss_function': params['loss_function'](),
              'env': gym.make('chess-v0'),
-             'board': params['bt']
+             'board': params['bt'],
+             'discount_factor': params['discount_factor'],
+             'n_epochs': params['n_epochs'],
+             'half_turn_limit': params['half_turn_limit'],
+             'episodes_before_update': params['episodes_before_update'],
+             'batch_size': params['batch_size']
              }
     base_model = type('base_model', superclasses, attrs)
     return base_model

@@ -5,7 +5,7 @@ import torch.multiprocessing as mp
 from torch.multiprocessing import Pool
 from classes import utils
 from models import model_defs
-import time
+
 
 # add itself for relative imports (TODO: this should be `pip install`(ed)
 do_modify = True
@@ -19,19 +19,18 @@ if do_modify:
     sys.path.insert(0, proj_path)
 
 net = model_defs.simple_cnn
-n_epochs = 40
-discount_factor = 0.5
 
 
 def pack_episode():
 
     model = net(resume=True, parent_process=False)
-    a, b, metrics = utils.play_episode(model, half_turn_limit=200)
+    a, b, metrics = utils.play_episode(
+        model, half_turn_limit=model.half_turn_limit)
     split = utils.split_episode_data(a, b)
     white_rewards = utils.discount_reward(
-        split['white_rewards'], discount_factor)
+        split['white_rewards'], model.discount_factor)
     black_rewards = utils.discount_reward(
-        split['black_rewards'], discount_factor)
+        split['black_rewards'], model.discount_factor)
     states = split['white_states'] + split['black_states']
     rewards = white_rewards + black_rewards
     out = {'states': states, 'rewards': rewards, 'metrics': metrics}
@@ -54,7 +53,7 @@ if __name__ == '__main__':
                 stack.append(res.get())
             return stack
 
-    def async_generate_data(n_episodes,
+    def async_generate_data(n_episodes, batch_size,
                             n_threads=os.cpu_count() if os.cpu_count() else 4):
         data = async(n_episodes, n_threads)
         rewards_stack = []
@@ -69,7 +68,8 @@ if __name__ == '__main__':
             metrics['wins'] += a['metrics']['wins']
             metrics['moves'] += a['metrics']['moves']
 
-        dataloader = utils.create_dataloader(states_stack, rewards_stack)
+        dataloader = utils.create_dataloader(
+            states_stack, rewards_stack, batch_size=batch_size)
         return dataloader, metrics
     run = net(resume=True)
     run.board()
@@ -79,9 +79,8 @@ if __name__ == '__main__':
     num_moves = 0
     run = net(resume=True)
     for i in range(100000):
-        start = time.time()
-        data, metrics = async_generate_data(20, n_threads=5)
-        print('time', time.time() - start)
+        data, metrics = async_generate_data(
+            run.episodes_before_update, run.batch_size, n_threads=5)
         # data, metrics = utils.generate_data(run, 5, discount_factor)
         num_moves += metrics['moves']
         num_wins += metrics['wins']
@@ -92,7 +91,7 @@ if __name__ == '__main__':
             num_wins = 0
             num_games = 0
             num_moves = 0
-        utils.training_session(run, data, n_epochs,
+        utils.training_session(run, data, run.n_epochs,
                                checkpoint_frequency=1,
                                save_param_frequency=10,
                                starting_index=0,
