@@ -19,16 +19,16 @@ from classes import utils
 from models import model_defs
 
 
-net = model_defs.fc_12_slice
+#net = model_defs.fc_12_slice
 net = model_defs.simple_cnn
-n_epochs = 20
+n_epochs = 40
 discount_factor = 0.5
 
 
 def pack_episode():
 
     model = net(resume=True, parent_process=False)
-    a, b, metrics = utils.play_episode(model)
+    a, b, metrics = utils.play_episode(model, half_turn_limit=200)
     split = utils.split_episode_data(a, b)
     white_rewards = utils.discount_reward(
         split['white_rewards'], discount_factor)
@@ -56,19 +56,23 @@ if __name__ == '__main__':
                 stack.append(res.get())
             return stack
 
-    def async_generate_data(n_threads=os.cpu_count() if os.cpu_count() else 4):
-        data = async(n_threads)
-        rewards_stack = []
-        states_stack = []
-        c = 0
-        metrics = {'wins': 0, 'moves': 0}
-        for _ in range(n_threads):
-            c += 1
-            a = data.pop()
-            rewards_stack += a['rewards']
-            states_stack += a['states']
-            metrics['wins'] += a['metrics']['wins']
-            metrics['moves'] += a['metrics']['moves']
+    def async_generate_data(n_episodes, n_threads=os.cpu_count() if os.cpu_count() else 4):
+        while(n_episodes > 0):
+            if(n_threads > n_episodes):
+                n_threads = n_episodes
+            data = async(n_threads)
+            rewards_stack = []
+            states_stack = []
+            c = 0
+            metrics = {'wins': 0, 'moves': 0}
+            for _ in range(n_threads):
+                c += 1
+                a = data.pop()
+                rewards_stack += a['rewards']
+                states_stack += a['states']
+                metrics['wins'] += a['metrics']['wins']
+                metrics['moves'] += a['metrics']['moves']
+            n_episodes -= n_threads
 
         dataloader = utils.create_dataloader(states_stack, rewards_stack)
         return dataloader, metrics
@@ -80,11 +84,11 @@ if __name__ == '__main__':
     num_moves = 0
     run = net(resume=True)
     for i in range(100000):
-        data, metrics = async_generate_data(n_threads=7)
+        data, metrics = async_generate_data(10, n_threads=5)
         #data, metrics = utils.generate_data(run, 5, discount_factor)
         num_moves += metrics['moves']
         num_wins += metrics['wins']
-        num_games += 7
+        num_games += 10
         print('Percent of games not drawn:', num_wins / num_games)
         print('Average n_moves:', num_moves / num_games)
         if(i % 100 == 0):
